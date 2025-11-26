@@ -1,15 +1,29 @@
-import { Text, View } from "react-native";
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import MapView from 'react-native-maps';
 
-export default function Index() {
+
+// maybe considerar os mapas do Expo e nao no React Native?
+// fica menos parecido com o Google Maps, talvez?
+export default function App() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+    <View style={styles.container}>
+
+      <MapView style={styles.map} 
+
+        
+      
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+});
