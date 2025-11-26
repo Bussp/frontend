@@ -1,0 +1,122 @@
+import React, { useEffect, useState, useRef } from "react";
+import { ActivityIndicator, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+
+// maybe considerar os mapas do Expo e nao no React Native?
+// fica menos parecido com o Google Maps, talvez?
+export default function Map() {
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [isCentered, setIsCentered] = useState(true);
+
+  const mapRef = useRef<MapView>(null);
+
+  useEffect(() => {
+    let subscription: any;
+
+    (async () => {
+      const ok = await checkPermission();
+      if (!ok) {
+        alert("Permissão negada");
+        return;
+      }
+
+      subscription = await watchUserLocation((newCoords) => {
+        setCoords(newCoords);
+      });
+    })();
+
+    return () => {
+      if (subscription) subscription.remove();
+    };
+  }, []);
+
+  if (!coords) {
+    return <ActivityIndicator size="large"/>;
+  }
+
+  function recenter() {
+    if (mapRef.current && coords) {
+      mapRef.current.animateCamera({
+        center: coords,
+        zoom: 16,
+      });
+      setIsCentered(true);
+    }
+  }
+
+  return (
+    <View style={styles.container}>
+
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={{
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
+        zoomEnabled={true}
+        zoomControlEnabled={true}
+        onPanDrag={() => setIsCentered(false)}
+        onRegionChange={(region) => {
+          const latDiff = Math.abs(region.latitude - coords.latitude);
+          const lonDiff = Math.abs(region.longitude - coords.longitude);
+          if (latDiff > 0.00001 || lonDiff > 0.00001) {
+            setIsCentered(false);
+          } else {
+            setIsCentered(true);
+          }
+        }}
+      >
+          <Marker
+            coordinate={{
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+            }}
+          >
+            <View style={styles.userMarker}/>
+          </Marker>
+
+      </MapView>
+
+      {!isCentered && (
+        <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
+          <Text style={styles.recenterText}>Centralizar</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+  userMarker: {
+    backgroundColor: '#33BBFF',
+    padding: 10,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+  },
+  recenterButton: {
+    position: "absolute",
+    bottom: 40,
+    right: 20,
+    backgroundColor: "white",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    elevation: 4,
+  },
+  recenterText: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+});
