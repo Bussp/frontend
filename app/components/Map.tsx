@@ -31,6 +31,16 @@ export default function Map() {
     };
   }, []);
 
+  // para a tela continuar centralizada quando o usuario se mover
+  useEffect(() => {
+    if (coords && isCentered && mapRef.current) {
+      mapRef.current.animateCamera({
+        center: coords,
+        zoom: 16,
+      });
+    }
+  }, [coords, isCentered]);
+
   if (!coords) {
     return <ActivityIndicator size="large"/>;
   }
@@ -63,7 +73,7 @@ export default function Map() {
         onRegionChange={(region) => {
           const latDiff = Math.abs(region.latitude - coords.latitude);
           const lonDiff = Math.abs(region.longitude - coords.longitude);
-          if (latDiff > 0.00001 || lonDiff > 0.00001) {
+          if (latDiff > 0.001 || lonDiff > 0.001) {
             setIsCentered(false);
           } else {
             setIsCentered(true);
