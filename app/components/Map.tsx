@@ -1,7 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { ActivityIndicator, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+import { checkPermission, watchUserLocation } from "../scripts/getLocation"
+
+import PolylineLayer from "./PolylineLayer";
+
+// por enquanto, pra TESTES!!
+// isso é uma rua na california, EUA
+import { testRoute } from "../test-data/testRoutes";
 
 // maybe considerar os mapas do Expo e nao no React Native?
 // fica menos parecido com o Google Maps, talvez?
@@ -10,6 +16,14 @@ export default function Map() {
   const [isCentered, setIsCentered] = useState(true);
 
   const mapRef = useRef<MapView>(null);
+  const [route, setRoute] = useState<{ latitude: number; longitude: number }[]>([]);
+
+  // para testes por ENQUANTO
+  // depois tem que fazer uma funcao pra puxar os pontos da rota do back
+  useEffect(() => {
+    setRoute(testRoute);
+  }, []);
+
 
   useEffect(() => {
     let subscription: any;
@@ -23,6 +37,8 @@ export default function Map() {
 
       subscription = await watchUserLocation((newCoords) => {
         setCoords(newCoords);
+        // isso aqui é pra adicionar o ponto atual do user à rota --> n sei se é necessário
+        //setRoute((prev) => [...prev, newCoords]);
       });
     })();
 
@@ -80,15 +96,14 @@ export default function Map() {
           }
         }}
       >
-          <Marker
-            coordinate={{
-              latitude: coords.latitude,
-              longitude: coords.longitude,
-            }}
-          >
-            <View style={styles.userMarker}/>
-          </Marker>
-
+      <Marker
+        coordinate={{
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }}>
+        <View style={styles.userMarker}/>
+      </Marker>
+        <PolylineLayer points={route} />
       </MapView>
 
       {!isCentered && (
@@ -117,7 +132,7 @@ const styles = StyleSheet.create({
   },
   recenterButton: {
     position: "absolute",
-    bottom: 40,
+    top: 40,
     right: 20,
     backgroundColor: "white",
     paddingVertical: 10,
