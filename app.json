@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "BusSp",
+    "slug": "BusSp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -44,6 +44,9 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "androidNavigationBar": {
+      "visible": "sticky-immersive"
     }
   }
 }

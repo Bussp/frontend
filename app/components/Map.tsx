@@ -1,7 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
-import { ActivityIndicator, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+import 'react-native-gesture-handler';
 import MapView, { Marker } from 'react-native-maps';
 import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+import BottomSheetMenu from "./BottomSheetMenu";
+
 
 // maybe considerar os mapas do Expo e nao no React Native?
 // fica menos parecido com o Google Maps, talvez?
@@ -92,10 +97,21 @@ export default function Map() {
       </MapView>
 
       {!isCentered && (
-        <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
-          <Text style={styles.recenterText}>Centralizar</Text>
+        <TouchableOpacity style={[styles.absoluteButtons, styles.recenterButton]} onPress={recenter}>
+          <AntDesign name="aim" size={20} color="black"/>
         </TouchableOpacity>
       )}
+
+
+      <TouchableOpacity style={[styles.absoluteButtons, styles.communityButton]}>
+          <FontAwesome name="users" size={20} color="black"/>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.absoluteButtons, styles.profileButton]}>
+          <FontAwesome name="user" size={20} color="black"/>
+      </TouchableOpacity>
+
+      <BottomSheetMenu/>
+        
     </View>
   );
 }
@@ -115,18 +131,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFFFFF',
   },
-  recenterButton: {
+  absoluteButtons: {
     position: "absolute",
-    bottom: 40,
-    right: 20,
     backgroundColor: "white",
+    width: 45,
+    height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
+    paddingHorizontal: 10,
+    borderRadius: 25,
     elevation: 4,
   },
-  recenterText: {
-    color: "#000",
-    fontWeight: "bold",
+  recenterButton: {
+    top: 40,
+    left: 20, 
+  },
+  profileButton: {
+    top: 40,
+    right: 20, 
+  },
+  communityButton: {
+    top: 40,
+    right: 70, 
   },
 });
