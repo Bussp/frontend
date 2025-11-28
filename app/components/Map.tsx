@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { ActivityIndicator, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { checkPermission, watchUserLocation } from "../scripts/getLocation"
 
+import { checkPermission, watchUserLocation } from "../scripts/getLocation"
 import PolylineLayer from "./PolylineLayer";
+import BusStopsLayer from "./BusStopsLayer";
 
 // por enquanto, pra TESTES!!
 // isso é uma rua na california, EUA
@@ -23,7 +24,10 @@ export default function Map() {
   useEffect(() => {
     setRoute(testRoute);
   }, []);
-
+  const busStopsTest = [
+    { latitude: 37.448548, longitude: -122.120818 },
+    { latitude: 37.409179, longitude: -122.067407 },
+  ];
 
   useEffect(() => {
     let subscription: any;
@@ -83,6 +87,7 @@ export default function Map() {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
+        customMapStyle={mapStyle}
         zoomEnabled={true}
         zoomControlEnabled={true}
         onPanDrag={() => setIsCentered(false)}
@@ -104,6 +109,7 @@ export default function Map() {
         <View style={styles.userMarker}/>
       </Marker>
         <PolylineLayer points={route} />
+        <BusStopsLayer stops={busStopsTest} />
       </MapView>
 
       {!isCentered && (
@@ -145,3 +151,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+const mapStyle = [
+  {
+    featureType: "poi",
+    elementType: "labels",
+    stylers: [
+      { visibility: "off" }
+    ]
+  }
+];
