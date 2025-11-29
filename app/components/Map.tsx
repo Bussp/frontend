@@ -3,12 +3,9 @@ import { ActivityIndicator, StyleSheet, View, TouchableOpacity, Text } from 'rea
 import MapView, { Marker } from 'react-native-maps';
 
 import { checkPermission, watchUserLocation } from "../scripts/getLocation"
+import { getShapeForRoute } from "../scripts/getBusRouteShape";
 import PolylineLayer from "./PolylineLayer";
 import BusStopsLayer from "./BusStopsLayer";
-
-// por enquanto, pra TESTES!!
-// isso é uma rua na california, EUA
-import { testRoute } from "../test-data/testRoutes";
 
 // maybe considerar os mapas do Expo e nao no React Native?
 // fica menos parecido com o Google Maps, talvez?
@@ -19,11 +16,12 @@ export default function Map() {
   const mapRef = useRef<MapView>(null);
   const [route, setRoute] = useState<{ latitude: number; longitude: number }[]>([]);
 
-  // para testes por ENQUANTO
-  // depois tem que fazer uma funcao pra puxar os pontos da rota do back
   useEffect(() => {
-    setRoute(testRoute);
-  }, []);
+      (async () => {
+        const coords = await getShapeForRoute("8084-10"); // pega o busp como exemplo
+        setRoute(coords);
+      })();
+    }, []);
   const busStopsTest = [
     { latitude: 37.448548, longitude: -122.120818 },
     { latitude: 37.409179, longitude: -122.067407 },
