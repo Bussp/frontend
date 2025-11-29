@@ -6,6 +6,7 @@ import 'react-native-gesture-handler';
 import MapView, { Marker } from 'react-native-maps';
 import { checkPermission, watchUserLocation } from "../scripts/getLocation";
 import BottomSheetMenu from "./BottomSheetMenu";
+import BusesLayer from './BusesLayer';
 
 
 // maybe considerar os mapas do Expo e nao no React Native?
@@ -13,9 +14,13 @@ import BottomSheetMenu from "./BottomSheetMenu";
 export default function Map() {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isCentered, setIsCentered] = useState(true);
-
+  
+  
   const mapRef = useRef<MapView>(null);
-
+  const [busesCoords, setBusesCoords] = useState<{ latitude: number; longitude: number }[]>([]);
+  const [currentLine, setCurrentLine] = useState<string | null>(null);
+  
+  
   useEffect(() => {
     let subscription: any;
 
@@ -94,6 +99,8 @@ export default function Map() {
             <View style={styles.userMarker}/>
           </Marker>
 
+          {currentLine!==null && <BusesLayer line={currentLine} stops={busesCoords} />}
+
       </MapView>
 
       {!isCentered && (
@@ -110,7 +117,7 @@ export default function Map() {
           <FontAwesome name="user" size={20} color="black"/>
       </TouchableOpacity>
 
-      <BottomSheetMenu/>
+      <BottomSheetMenu {...{setCurrentLine}}/>
         
     </View>
   );
