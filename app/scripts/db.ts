@@ -1,8 +1,8 @@
+import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
 import Papa from "papaparse";
-import * as FileSystem from "expo-file-system";
 
-export const db = SQLite.openDatabase("gtfs.db");
+export const db = SQLite.openDatabaseSync("gtfs.db");
 
 export async function initDB() {
   db.transaction((tx) => {
