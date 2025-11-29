@@ -22,7 +22,7 @@ async function runTests() {
     });
 
     assert.equal(user.email, email);
-    console.log("✅ registerUser OK!");
+    console.log("1/5 registerUser OK!");
 
     // -------------------------
     console.log("Passo 2: loginUser...");
@@ -30,7 +30,7 @@ async function runTests() {
 
     assert.ok(login.access_token);
     assert.equal(login.token_type, "bearer");
-    console.log("✅ loginUser OK!");
+    console.log("2/5 loginUser OK!");
 
     // 3) cria trip
     console.log("Teste 3: createTrip...");
@@ -46,7 +46,7 @@ async function runTests() {
     const tripResult = await createTrip(payload);
 
     assert.equal(typeof tripResult.score, "number");
-    console.log("✅ createTrip OK! Score:", tripResult.score);
+    console.log("3/5 createTrip OK! Score:", tripResult.score);
 
     // Agora o apiClient já tem o token salvo
 
@@ -59,7 +59,7 @@ async function runTests() {
     assert.equal(typeof rank.position, "number");
 
     console.log("Posição retornada:", rank.position);
-    console.log("✅ getUserRank OK!");
+    console.log("4/5 getUserRank OK!");
 
     // -------------------------
     console.log("Passo 5: getGlobalRank...");
@@ -76,12 +76,12 @@ async function runTests() {
     assert.equal(typeof first.score, "number");
 
     console.log("Total usuários no ranking:", global.users.length);
-    console.log("✅ getGlobalRank OK!");
+    console.log("5/5 getGlobalRank OK!");
 
-    console.log("\n🎉 TODOS TESTES DE RANK PASSARAM!\n");
+    console.log("\n TODOS TESTES DE RANK PASSARAM!\n");
 
   } catch (err) {
-    console.error("\n❌ FALHOU:", err);
+    console.error("\n FALHOU:", err);
     process.exit(1);
   }
 }

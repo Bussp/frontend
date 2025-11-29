@@ -18,14 +18,14 @@ async function runTests() {
       email,
       password,
     });
-    console.log("✅ registerUser OK!");
+    console.log("1/3 registerUser OK!");
 
 
 
     // 2) faz login (para setar o JWT no client)
     console.log("Teste 2: loginUser...");
     await loginUser(email, password);
-    console.log("✅ loginUser OK!");
+    console.log("2/3 loginUser OK!");
 
     // 3) cria trip
     console.log("Teste 3: createTrip...");
@@ -41,11 +41,11 @@ async function runTests() {
     const tripResult = await createTrip(payload);
 
     assert.equal(typeof tripResult.score, "number");
-    console.log("✅ createTrip OK! Score:", tripResult.score);
+    console.log("3/3 createTrip OK! Score:", tripResult.score);
 
-    console.log("\n🎉 TODOS TESTES DE TRIPS PASSARAM!\n");
+    console.log("\n TODOS TESTES DE TRIPS PASSARAM!\n");
   } catch (err) {
-    console.error("\n❌ FALHOU:", err);
+    console.error("\n FALHOU:", err);
     process.exit(1);
   }
 }
