@@ -5,8 +5,8 @@ import Papa from "papaparse";
 export const db = SQLite.openDatabaseSync("gtfs.db");
 
 export async function initDB() {
-  db.transaction((tx) => {
-    tx.executeSql(`
+  await db.withTransactionAsync(async () => {
+    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS trips (
         route_id TEXT,
         service_id TEXT,
@@ -14,17 +14,15 @@ export async function initDB() {
         trip_headsign TEXT,
         direction_id TEXT,
         shape_id TEXT
-      );
     `);
 
-    tx.executeSql(`
+    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS shapes (
         shape_id TEXT,
         shape_pt_lat REAL,
         shape_pt_lon REAL,
         shape_pt_sequence INTEGER,
         shape_dist_traveled REAL
-      );
     `);
   });
 }
@@ -39,9 +37,9 @@ export async function populateDB() {
   const tripsCSV = await readCSV(FileSystem.documentDirectory + "trips.csv");
   const shapesCSV = await readCSV(FileSystem.documentDirectory + "shapes.csv");
 
-  db.transaction((tx) => {
-    tripsCSV.forEach((row) => {
-      tx.executeSql(
+  await db.withTransactionAsync(async () => {
+    tripsCSV.forEach(async (row) => {
+      await db.runAsync(
         `INSERT INTO trips (route_id, service_id, trip_id, trip_headsign, direction_id, shape_id)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [
@@ -55,8 +53,8 @@ export async function populateDB() {
       );
     });
 
-    shapesCSV.forEach((row) => {
-      tx.executeSql(
+    shapesCSV.forEach(async (row) => {
+      await db.runAsync(
         `INSERT INTO shapes (shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, shape_dist_traveled)
          VALUES (?, ?, ?, ?, ?)`,
         [
