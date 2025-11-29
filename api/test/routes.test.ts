@@ -38,7 +38,7 @@ async function runTests() {
     const payload: RoutesPositionsRequest = {
       routes: [
         {
-          bus_line: "Pinheiros", 
+          bus_line: "8084-10", 
           bus_direction: 1,
         },
       ],
@@ -49,6 +49,8 @@ async function runTests() {
     assert.ok(result);
     assert.ok(Array.isArray(result.buses));
     console.log(`Buses encontrados: ${result.buses.length}`);
+
+    console.log(result.buses[0].position);
 
     const first = result.buses[0];
 
