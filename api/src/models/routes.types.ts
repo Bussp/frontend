@@ -42,3 +42,9 @@ export type RoutesPositionsRequest = {
 export type RoutesPositionsResponse = {
   buses: BusPosition[];
 };
+
+export interface RouteShapeResponse {
+  route_id: string;
+  shape_id: string;
+  points: Coordinate[];
+}

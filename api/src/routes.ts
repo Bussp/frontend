@@ -2,13 +2,13 @@ import { apiClient } from "./client";
 import {
   RoutesDetailsRequest,
   RoutesDetailsResponse,
+  RouteShapeResponse,
   RoutesPositionsRequest,
   RoutesPositionsResponse,
 } from "./models/routes.types";
 
 /**
  * POST /routes/details
- * Resolve as rotas concretas (route_id + bus_line).
  */
 export async function getRouteDetails(
   payload: RoutesDetailsRequest,
@@ -18,10 +18,19 @@ export async function getRouteDetails(
 
 /**
  * POST /routes/positions
- * Recupera as posições dos ônibus para rotas já resolvidas (BusRoute[]).
  */
 export async function getRoutesPositions(
   payload: RoutesPositionsRequest,
 ): Promise<RoutesPositionsResponse> {
   return apiClient.post<RoutesPositionsResponse>("/routes/positions", payload);
+}
+
+/**
+ * GET /routes/shape/{route_id}
+ * Retorna o shape (coordenadas) de uma rota.
+ */
+export async function getRouteShape(
+  routeId: string,
+): Promise<RouteShapeResponse> {
+  return apiClient.get<RouteShapeResponse>(`/routes/shape/${routeId}`);
 }

@@ -1,7 +1,7 @@
 // api/test/routes.test.ts
 import assert from "node:assert/strict";
 import { RoutesPositionsRequest } from "../src/models/routes.types";
-import { getRouteDetails, getRoutesPositions } from "../src/routes";
+import { getRouteDetails, getRouteShape, getRoutesPositions } from "../src/routes";
 import { loginUser, registerUser } from "../src/users";
 
 async function runTests() {
@@ -84,6 +84,31 @@ async function runTests() {
     assert.equal(typeof first.time_updated, "string");
 
     console.log("getRoutesPositions OK");
+
+    // ----------------------
+    console.log("Passo 5: getRouteShape...");
+
+    // Use um route_id que exista no seu GTFS.
+    // Se preferir, troque "1012-10" por outro que você saiba que existe.
+    const exampleRouteId = "1012-10";
+
+    const shape = await getRouteShape(exampleRouteId);
+
+    assert.ok(shape);
+    assert.equal(typeof shape.route_id, "string");
+    assert.equal(shape.route_id, exampleRouteId);
+
+    assert.equal(typeof shape.shape_id, "string");
+
+    assert.ok(Array.isArray(shape.points));
+    assert.ok(shape.points.length > 0);
+
+    const firstPoint = shape.points[0];
+    assert.equal(typeof firstPoint.latitude, "number");
+    assert.equal(typeof firstPoint.longitude, "number");
+
+    console.log("getRouteShape OK");
+
     console.log("\nTodos os testes de routes passaram.\n");
   } catch (err) {
     console.error("\nFalhou:", err);
