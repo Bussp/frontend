@@ -33,6 +33,9 @@ export default function Map() {
     lastBusPosition: null,
     lastUserPosition: null,
     lastTime: null,
+    distHistory: Array(10).fill(Infinity),
+    distIndex: 0,
+    closeCount: 0,
   });
 
 
@@ -112,7 +115,6 @@ export default function Map() {
           // resolvi tirar pq isso n atualiza o estado imediatamente e só enfileira a atualização
           // ent se outro callback do watchUserLocation disparar antes do React aplicar a atualização
           // teriamos um busState desatualizado
-          console.log("aa, estado atual do busstate:", busStateRef.current);
           //setBusState(prevState => detectBusState(prevState, newCoords, currentBuses, currentRoute));
           const newBusState = detectBusState(busStateRef.current, newCoords, currentBuses, currentRoute);
           busStateRef.current = newBusState;
@@ -140,7 +142,6 @@ export default function Map() {
   // imprimir
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("Dentro do ônibus?", busState.insideBus);
     }, 5000);
 
     return () => clearInterval(interval);
