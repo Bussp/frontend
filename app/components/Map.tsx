@@ -2,27 +2,90 @@ import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
+import { RouteIdentifier } from "../api/models/routes.types";
+import { fetchBusPositions } from "../mocks/getBuses";
+import { Bus, BusState, Coord, detectBusState } from "../scripts/busDetection";
 import { getShapeForRoute } from "../scripts/getBusRouteShape";
-import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+// import { getShapeForRoute } from "../mocks/getBusRouteShape";
+import { checkPermission, watchUserLocation } from "../mocks/getLocation";
+
+import BusesLayer from "./BusesLayer";
 import BusStopsLayer from "./BusStopsLayer";
 import PolylineLayer from "./PolylineLayer";
 
-// maybe considerar os mapas do Expo e nao no React Native?
-// fica menos parecido com o Google Maps, talvez?
+// pra testes!! vamo monitorar a linha 84
+const monitoredRoutes: RouteIdentifier[] = [
+  { bus_line: "8084-10", bus_direction: 1 },
+];
+
 export default function Map() {
-  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [coords, setCoords] = useState<Coord | null>(null);
   const [isCentered, setIsCentered] = useState(true);
 
   const mapRef = useRef<MapView>(null);
-  const [route, setRoute] = useState<{ latitude: number; longitude: number }[]>([]);
+
+  // rota + estado de o usuário está no onibus ou n
+  const [route, setRoute] = useState<Coord[]>([]);
+  const [buses, setBuses] = useState<Bus[]>([]);
+  const [busState, setBusState] = useState<BusState>({
+    insideBus: false,
+    busId: null,
+    lastBusPosition: null,
+    lastUserPosition: null,
+    lastTime: null,
+  });
+
+
+  // refs para garantir que o callback veja os valores atualizados
+  const routeRef = useRef<Coord[]>([]);
+  const busesRef = useRef<Bus[]>([]);
+  const busStateRef = useRef<BusState>(busState);
 
   useEffect(() => {
+    routeRef.current = route;
+  }, [route]);
+
+  useEffect(() => {
+    busesRef.current = buses;
+  }, [buses]);
+
+  useEffect(() => {
+    busStateRef.current = busState;
+  }, [busState]);
+
+
+  // esse userEffect é pra pegar as posicoes dos onibus a cada 1 segundo
+  useEffect(() => {
+    let interval: NodeJS.Timer;
+
+    const startFetchingBuses = async () => {
+      try {
+        const busesData = await fetchBusPositions(monitoredRoutes);
+        setBuses(busesData);
+        interval = setInterval(async () => {
+          const busesData = await fetchBusPositions(monitoredRoutes);
+          setBuses(busesData);
+        }, 1000); // podia ser mais, menos?
+
+      } catch (err) {
+        console.error("Erro ao buscar posições dos ônibus:", err);
+      }
+    };
+    startFetchingBuses();
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, []);
+
+  // userEffect é pra pegar as coordenadas da rota
+  useEffect(() => {
       (async () => {
-        const coords = await getShapeForRoute("5021-10"); // pega o busp como exemplo
-        setRoute(coords.points);
+        const routeCoords = await getShapeForRoute(monitoredRoutes[0].bus_line);
+        setRoute(routeCoords.points);
       })();
     }, []);
-  const busStopsTest = [
+
+  const busStopsTest: Coord[] = [
     { latitude: 37.448548, longitude: -122.120818 },
     { latitude: 37.409179, longitude: -122.067407 },
   ];
@@ -39,8 +102,22 @@ export default function Map() {
 
       subscription = await watchUserLocation((newCoords) => {
         setCoords(newCoords);
-        // isso aqui é pra adicionar o ponto atual do user à rota --> n sei se é necessário
-        //setRoute((prev) => [...prev, newCoords]);
+
+        const currentRoute = routeRef.current;
+        const currentBuses = busesRef.current;
+
+        if (currentRoute.length > 0 && currentBuses.length > 0) {
+          // const newBusState = detectBusState(busState, newCoords, buses, route);
+          // setBusState(newBusState)
+          // resolvi tirar pq isso n atualiza o estado imediatamente e só enfileira a atualização
+          // ent se outro callback do watchUserLocation disparar antes do React aplicar a atualização
+          // teriamos um busState desatualizado
+          console.log("aa, estado atual do busstate:", busStateRef.current);
+          //setBusState(prevState => detectBusState(prevState, newCoords, currentBuses, currentRoute));
+          const newBusState = detectBusState(busStateRef.current, newCoords, currentBuses, currentRoute);
+          busStateRef.current = newBusState;
+          setBusState(newBusState);
+        }
       });
     })();
 
@@ -58,6 +135,16 @@ export default function Map() {
       });
     }
   }, [coords, isCentered]);
+
+
+  // imprimir
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Dentro do ônibus?", busState.insideBus);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [busState]);
 
   if (!coords) {
     return <ActivityIndicator size="large"/>;
@@ -108,12 +195,17 @@ export default function Map() {
       </Marker>
         <PolylineLayer points={route} />
         <BusStopsLayer stops={busStopsTest} />
+        <BusesLayer buses={buses} />
       </MapView>
 
       {!isCentered && (
         <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
           <Text style={styles.recenterText}>Centralizar</Text>
         </TouchableOpacity>
+      )}
+
+      {busState.insideBus && (
+        <Text style={styles.busStatus}>Dentro do ônibus{busState.busId}</Text>
       )}
     </View>
   );
@@ -147,6 +239,16 @@ const styles = StyleSheet.create({
   recenterText: {
     color: "#000",
     fontWeight: "bold",
+  },
+  busStatus: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    backgroundColor: '#38761D',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    elevation: 4,
   },
 });
 
