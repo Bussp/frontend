@@ -6,12 +6,10 @@ import MapView, { Marker } from 'react-native-maps';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { RouteIdentifier } from "../api/models/routes.types";
-import { fetchBusPositions } from "../mocks/getBuses";
 import { Bus, BusState, Coord } from "../models/buses";
 import { detectBusState } from "../scripts/busDetection";
 import { getShapeForRoute } from "../scripts/getBusRouteShape";
-// import { getShapeForRoute } from "../mocks/getBusRouteShape";
-import { checkPermission, watchUserLocation } from "../mocks/getLocation";
+import { checkPermission, watchUserLocation } from "../scripts/getLocation";
 
 import BottomSheetMenu from "./BottomSheetMenu";
 import BusesLayer from "./BusesLayer";
@@ -54,9 +52,25 @@ export default function Map() {
 
   // pegar as posicoes dos onibus a cada 1 segundo
   useEffect(() => {
-    let interval: NodeJS.Timer;
+    if (!currentLine) {
+      setBuses([]);
+      setRoute([]);
+      return;
+    }
 
+    (async () => {
+      try {
+        const routeCoords = await getShapeForRoute(currentLine);
+        setRoute(routeCoords.points);
+      } catch (err) {
+        console.error("Erro ao buscar rota:", err);
+      }
+    })();
+
+    /*
+    let interval: NodeJS.Timer;
     const startFetchingBuses = async () => {
+
       try {
         const busesData = await fetchBusPositions(monitoredRoutes);
         setBuses(busesData);
@@ -73,15 +87,8 @@ export default function Map() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, []);
-
-  // pegar as coordenadas da rota
-  useEffect(() => {
-      (async () => {
-        const routeCoords = await getShapeForRoute(monitoredRoutes[0].bus_line);
-        setRoute(routeCoords.points);
-      })();
-    }, []);
+  */
+  }, [currentLine]);
 
   // aqui precisa ser coletado as coordenadas do ponto de onibus
   const busStopsTest: Coord[] = [

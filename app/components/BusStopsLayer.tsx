@@ -1,16 +1,11 @@
 // BusStopsLayer.tsx
-import React from "react";
-import { View } from "react-native";
-import { Marker } from "react-native-maps";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-
-type BusStop = {
-  latitude: number;
-  longitude: number;
-};
+import React from "react";
+import { Marker } from "react-native-maps";
+import { Coord } from '../models/buses';
 
 type Props = {
-  stops: BusStop[];
+  stops: Coord[];
 };
 
 export default function BusStopsLayer({ stops }: Props) {
