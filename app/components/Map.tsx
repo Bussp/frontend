@@ -6,7 +6,7 @@ import 'react-native-gesture-handler';
 import MapView, { Marker } from 'react-native-maps';
 import { checkPermission, watchUserLocation } from "../scripts/getLocation";
 import BottomSheetMenu from "./BottomSheetMenu";
-import BusesLayer from './BusesLayer';
+import BusesLayer, { BusGroup } from './BusesLayer';
 
 
 // maybe considerar os mapas do Expo e nao no React Native?
@@ -17,9 +17,30 @@ export default function Map() {
   
   
   const mapRef = useRef<MapView>(null);
-  const [busesCoords, setBusesCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const [currentLine, setCurrentLine] = useState<string | null>(null);
+  const [busesCoords, setBusesCoords] = useState<BusGroup[]>([]);
   
+
+  useEffect(() => {
+      if (!currentLine) return;
+
+      const fetchBuses = async () => {
+        try {
+          console.log(currentLine)
+          // const res = await getBuses(currentLine);
+          // const groups = convertToBusGroup(res);
+          // setBusGroups(groups);
+        } catch (error) {
+          console.error("Erro ao buscar ônibus: ", error);
+        }
+      };
+
+      fetchBuses();
+
+      const interval = setInterval(fetchBuses, 5000);
+
+      return () => clearInterval(interval);
+  }, [currentLine]);
   
   useEffect(() => {
     let subscription: any;
@@ -54,6 +75,7 @@ export default function Map() {
   if (!coords) {
     return <ActivityIndicator size="large"/>;
   }
+
 
   function recenter() {
     if (mapRef.current && coords) {
@@ -99,7 +121,7 @@ export default function Map() {
             <View style={styles.userMarker}/>
           </Marker>
 
-          {currentLine!==null && <BusesLayer line={currentLine} stops={busesCoords} />}
+          {currentLine!==null && <BusesLayer line={currentLine} groups={busesCoords} />}
 
       </MapView>
 

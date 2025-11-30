@@ -3,28 +3,38 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import React from "react";
 import { Marker } from "react-native-maps";
 
-type Buses = {
+export type Bus = {
   latitude: number;
   longitude: number;
 };
 
-type Props = {
-    line: string;
-    type: number;
-    stops: Buses[];
+export type BusGroup = {
+  type: number;
+  buses: Bus[];
 };
 
-export default function BusesLayer({ line, type, stops }: Props) {
+type Props = {
+  line: string;
+  groups: BusGroup[];
+};
+
+export default function BusesLayer({ line, groups }: Props) {
   return (
     <>
-      {stops.map((bus) => (
-        <Marker
-          key={line}
-          coordinate={{ latitude: bus.latitude, longitude: bus.longitude }}
-        >
-          <FontAwesome5 name="bus-alt" size={16} color={(type===1) ? '#FFBB11' : '#11BBFF'} />
-        </Marker>
-      ))}
+      {groups.map((group) =>
+        group.buses.map((bus) => (
+          <Marker
+            key={`${line}: Sentido ${group.type}`}
+            coordinate={{ latitude: bus.latitude, longitude: bus.longitude }}
+          >
+            <FontAwesome5
+              name="bus-alt"
+              size={16}
+              color={group.type === 1 ? "#FFBB11" : "#11BBFF"}
+            />
+          </Marker>
+        ))
+      )}
     </>
   );
 }

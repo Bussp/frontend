@@ -1,7 +1,8 @@
+import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from "@gorhom/bottom-sheet";
 import React, { useMemo, useRef, useState } from "react";
-import { Keyboard, StyleSheet, Text, View } from "react-native";
+import { Keyboard, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from 'react-native-gesture-handler';
 import { busLine } from '../interfaces/busLine';
 import { buscarLinha } from '../scripts/apiSPTrans';
@@ -54,6 +55,14 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine}) => {
         sheetRef.current?.collapse();
     }
 
+    const removeSelectedLine = () => {
+        setCurrentLine(null);
+        setLineSearch("");
+        setSuggestions([]);
+        Keyboard.dismiss();
+        sheetRef.current?.collapse();
+    }
+
     return (
         <BottomSheet 
             ref={sheetRef} 
@@ -74,6 +83,10 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine}) => {
                         placeholder="Procurar linha..."
                         style={styles.textInput}
                     />
+                    <TouchableOpacity onPress={removeSelectedLine}>
+                        <Feather name={"x"} size={24} color="gray" />
+                    </TouchableOpacity>
+                    
                     {lineSearch.length > 0 &&
                         <FlatList
                             data={lineSuggestions}
@@ -164,7 +177,7 @@ const styles = StyleSheet.create({
     textInput: {
         margin: 5,
         paddingHorizontal: 15,
-        width: '70%',
+        width: '80%',
     },
     commonLine: {
         width: '70%',
