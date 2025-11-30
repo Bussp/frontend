@@ -12,7 +12,7 @@ export default function RankingLocal({ Data } : {Data : RankUserResponse}) {
             </DataTable.Header>
 
             <DataTable.Row>
-                <DataTable.Cell>#{Data}</DataTable.Cell>
+                <DataTable.Cell>#{Data.position}</DataTable.Cell>
                 <DataTable.Cell>{item.name}</DataTable.Cell>
                 <DataTable.Cell numeric>{item.score}</DataTable.Cell>
             </DataTable.Row>

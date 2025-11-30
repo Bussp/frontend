@@ -25,19 +25,15 @@ export const styleGlobalRanking = StyleSheet.create({
     },
     title: {
         backgroundColor: "#D9D9D9",
-    },
-})
-
-export const styleGlobalRankingLine = StyleSheet.create({
-    row: {
-        borderBottomWidth: 0,
-    }
-})
-
-export const styleGlobalRankingHeader = StyleSheet.create({
-    container: {
+        fontWeight: "bold",
         borderBottomWidth: 2,
         borderBottomColor: "#000",
-        color: "#000",
+    },
+    row: {
+        borderBottomWidth: 0,
+    },
+    rowHeader : {
+        borderBottomWidth: 0,
+        fontWeight: "bold",
     }
 })
