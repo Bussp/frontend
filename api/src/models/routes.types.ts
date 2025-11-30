@@ -10,14 +10,14 @@ export type BusRoute = {
   route: RouteIdentifier;
 };
 
-export type Coordinate = {
+export type Coords = {
   latitude: number;
   longitude: number;
 };
 
 export type BusPosition = {
   route: RouteIdentifier; // backend devolve apenas o identificador simples
-  position: Coordinate;
+  position: Coords;
   time_updated: string; // ISO datetime
 };
 
@@ -46,5 +46,5 @@ export type RoutesPositionsResponse = {
 export interface RouteShapeResponse {
   route_id: string;
   shape_id: string;
-  points: Coordinate[];
+  points: Coords[];
 }
