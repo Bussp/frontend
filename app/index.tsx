@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import Map from "./components/Map";
-
-export default function App() {
-  return <Map />;
-=======
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Map from "./components/Map";
@@ -26,5 +20,4 @@ export default function App() {
       <Map/>
     </GestureHandlerRootView>
   );
->>>>>>> main
 }
