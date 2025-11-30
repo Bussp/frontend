@@ -1,14 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import 'react-native-gesture-handler';
 import MapView, { Marker } from 'react-native-maps';
+
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { RouteIdentifier } from "../api/models/routes.types";
 import { fetchBusPositions } from "../mocks/getBuses";
-import { Bus, BusState, Coord, detectBusState } from "../scripts/busDetection";
+import { Bus, BusState, Coord } from "../models/buses";
+import { detectBusState } from "../scripts/busDetection";
 import { getShapeForRoute } from "../scripts/getBusRouteShape";
 // import { getShapeForRoute } from "../mocks/getBusRouteShape";
 import { checkPermission, watchUserLocation } from "../mocks/getLocation";
 
+import BottomSheetMenu from "./BottomSheetMenu";
 import BusesLayer from "./BusesLayer";
 import BusStopsLayer from "./BusStopsLayer";
 import PolylineLayer from "./PolylineLayer";
@@ -23,6 +28,7 @@ export default function Map() {
   const [isCentered, setIsCentered] = useState(true);
 
   // rota + estado de o usuário está no onibus ou n
+  const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [route, setRoute] = useState<Coord[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [busState, setBusState] = useState<BusState>({
@@ -95,7 +101,6 @@ export default function Map() {
 
       subscription = await watchUserLocation((newCoords) => {
         setCoords(newCoords);
-
         const currentRoute = routeRef.current;
         const currentBuses = busesRef.current;
 
@@ -122,13 +127,13 @@ export default function Map() {
     }
   }, [coords, isCentered]);
 
-
   // imprimir
   useEffect(() => {
     const interval = setInterval(() => {
     }, 5000);
     return () => clearInterval(interval);
   }, [busState]);
+
 
   if (!coords) {
     return <ActivityIndicator size="large"/>;
@@ -170,6 +175,7 @@ export default function Map() {
           }
         }}
       >
+
       <Marker
         coordinate={{
           latitude: coords.latitude,
@@ -179,7 +185,7 @@ export default function Map() {
       </Marker>
         <PolylineLayer points={route} />
         <BusStopsLayer stops={busStopsTest} />
-        <BusesLayer buses={buses} />
+        {currentLine!==null && <BusesLayer line={currentLine} buses={buses} />}
       </MapView>
 
       {!isCentered && (
@@ -188,9 +194,19 @@ export default function Map() {
         </TouchableOpacity>
       )}
 
+      <TouchableOpacity style={[styles.absoluteButtons, styles.communityButton]}>
+          <FontAwesome name="users" size={20} color="black"/>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.absoluteButtons, styles.profileButton]}>
+          <FontAwesome name="user" size={20} color="black"/>
+      </TouchableOpacity>
+
+      <BottomSheetMenu {...{setCurrentLine}}/>
+
       {busState.insideBus && (
         <Text style={styles.busStatus}>Dentro do ônibus {busState.busId}</Text>
       )}
+
     </View>
   );
 }
@@ -210,16 +226,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFFFFF',
   },
-  recenterButton: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-    backgroundColor: "white",
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    elevation: 4,
-  },
   recenterText: {
     color: "#000",
     fontWeight: "bold",
@@ -233,6 +239,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 8,
     elevation: 4,
+  },
+  absoluteButtons: {
+    position: "absolute",
+    backgroundColor: "white",
+    width: 45,
+    height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 25,
+    elevation: 4,
+  },
+  recenterButton: {
+    top: 40,
+    right: 20,
+  },
+  profileButton: {
+    top: 40,
+    right: 20, 
+  },
+  communityButton: {
+    top: 40,
+    right: 70, 
   },
 });
 
