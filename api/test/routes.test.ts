@@ -1,7 +1,7 @@
 // api/test/routes.test.ts
 import assert from "node:assert/strict";
 import { RoutesPositionsRequest } from "../src/models/routes.types";
-import { getRoutesPositions } from "../src/routes";
+import { getRouteDetails, getRoutesPositions } from "../src/routes";
 import { loginUser, registerUser } from "../src/users";
 
 async function runTests() {
@@ -20,7 +20,7 @@ async function runTests() {
     });
 
     assert.equal(user.email, email);
-    console.log("✅ registerUser OK!");
+    console.log("registerUser OK");
 
     // ----------------------
     console.log("Passo 2: loginUser...");
@@ -28,20 +28,42 @@ async function runTests() {
 
     assert.ok(login.access_token);
     assert.equal(login.token_type, "bearer");
-    console.log("✅ loginUser OK!");
+    console.log("loginUser OK");
 
     // A partir daqui o apiClient já está com o token setado
 
     // ----------------------
-    console.log("Passo 3: getRoutesPositions...");
+    console.log("Passo 3: getRouteDetails...");
 
-    const payload: RoutesPositionsRequest = {
+    const detailsResult = await getRouteDetails({
       routes: [
         {
-          bus_line: "8084-10", 
+          bus_line: "8075",
           bus_direction: 1,
         },
       ],
+    });
+
+    assert.ok(detailsResult);
+    assert.ok(Array.isArray(detailsResult.routes));
+    assert.ok(detailsResult.routes.length > 0);
+
+    const resolvedRoutes = detailsResult.routes;
+    console.log(`Rotas resolvidas: ${resolvedRoutes.length}`);
+
+    const firstRoute = resolvedRoutes[0];
+    assert.equal(typeof firstRoute.route_id, "number");
+    assert.ok(firstRoute.route);
+    assert.equal(typeof firstRoute.route.bus_line, "string");
+    assert.equal(typeof firstRoute.route.bus_direction, "number");
+
+    console.log("getRouteDetails OK");
+
+    // ----------------------
+    console.log("Passo 4: getRoutesPositions...");
+
+    const payload: RoutesPositionsRequest = {
+      routes: resolvedRoutes, // lista de BusRoute, saída do /routes/details
     };
 
     const result = await getRoutesPositions(payload);
@@ -50,8 +72,7 @@ async function runTests() {
     assert.ok(Array.isArray(result.buses));
     console.log(`Buses encontrados: ${result.buses.length}`);
 
-    console.log(result.buses[0].position);
-
+    assert.ok(result.buses.length > 0);
     const first = result.buses[0];
 
     assert.ok(first.route);
@@ -61,12 +82,11 @@ async function runTests() {
     assert.equal(typeof first.position.latitude, "number");
     assert.equal(typeof first.position.longitude, "number");
     assert.equal(typeof first.time_updated, "string");
-    
 
-    console.log("✅ getRoutesPositions OK!");
-    console.log("\n🎉 TODOS TESTES DE ROUTES PASSARAM!\n");
+    console.log("getRoutesPositions OK");
+    console.log("\nTodos os testes de routes passaram.\n");
   } catch (err) {
-    console.error("\n❌ FALHOU:", err);
+    console.error("\nFalhou:", err);
     process.exit(1);
   }
 }
