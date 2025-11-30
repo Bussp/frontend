@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
-import { ActivityIndicator, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
-import { checkPermission, watchUserLocation } from "../scripts/getLocation"
 import { getShapeForRoute } from "../scripts/getBusRouteShape";
-import PolylineLayer from "./PolylineLayer";
+import { checkPermission, watchUserLocation } from "../scripts/getLocation";
 import BusStopsLayer from "./BusStopsLayer";
+import PolylineLayer from "./PolylineLayer";
 
 // maybe considerar os mapas do Expo e nao no React Native?
 // fica menos parecido com o Google Maps, talvez?
@@ -18,8 +18,8 @@ export default function Map() {
 
   useEffect(() => {
       (async () => {
-        const coords = await getShapeForRoute("8084-10"); // pega o busp como exemplo
-        setRoute(coords);
+        const coords = await getShapeForRoute("5021-10"); // pega o busp como exemplo
+        setRoute(coords.points);
       })();
     }, []);
   const busStopsTest = [
