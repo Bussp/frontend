@@ -3,10 +3,10 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import MapView, { Marker } from 'react-native-maps';
 
 import { Bus, BusState, Coord, detectBusState } from "../scripts/busDetection";
-import { fetchBusPositions, Bus } from "../scripts/getBuses";
-import { RouteIdentifier } from "../scripts/models/routes.types";
-import { getShapeForRoute } from "../scripts/getBusRouteShape";
-import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+import { fetchBusPositions } from "../mocks/getBuses";
+import { RouteIdentifier } from "../api/models/routes.types";
+import { getShapeForRoute } from "../mocks/getBusRouteShape";
+import { checkPermission, watchUserLocation } from "../mocks/getLocation";
 
 import BusStopsLayer from "./BusStopsLayer";
 import PolylineLayer from "./PolylineLayer";
@@ -34,7 +34,26 @@ export default function Map() {
     lastTime: null,
   });
 
-  // esse userEffect é pra pegar as posicoes dos onibus a cada 5 segundos
+
+  // refs para garantir que o callback veja os valores atualizados
+  const routeRef = useRef<Coord[]>([]);
+  const busesRef = useRef<Bus[]>([]);
+  const busStateRef = useRef<BusState>(busState);
+
+  useEffect(() => {
+    routeRef.current = route;
+  }, [route]);
+
+  useEffect(() => {
+    busesRef.current = buses;
+  }, [buses]);
+
+  useEffect(() => {
+    busStateRef.current = busState;
+  }, [busState]);
+
+
+  // esse userEffect é pra pegar as posicoes dos onibus a cada 1 segundo
   useEffect(() => {
     let interval: NodeJS.Timer;
 
@@ -45,7 +64,7 @@ export default function Map() {
         interval = setInterval(async () => {
           const busesData = await fetchBusPositions(monitoredRoutes);
           setBuses(busesData);
-        }, 5000); // podia ser 1 segundo?
+        }, 1000); // podia ser mais, menos?
 
       } catch (err) {
         console.error("Erro ao buscar posições dos ônibus:", err);
@@ -57,6 +76,7 @@ export default function Map() {
     };
   }, []);
 
+  // userEffect é pra pegar as coordenadas da rota
   useEffect(() => {
       (async () => {
         const routeCoords = await getShapeForRoute(monitoredRoutes[0].bus_line);
@@ -82,13 +102,20 @@ export default function Map() {
       subscription = await watchUserLocation((newCoords) => {
         setCoords(newCoords);
 
-        if (route.length > 0 && buses.length > 0) {
+        const currentRoute = routeRef.current;
+        const currentBuses = busesRef.current;
+
+        if (currentRoute.length > 0 && currentBuses.length > 0) {
           // const newBusState = detectBusState(busState, newCoords, buses, route);
           // setBusState(newBusState)
           // resolvi tirar pq isso n atualiza o estado imediatamente e só enfileira a atualização
           // ent se outro callback do watchUserLocation disparar antes do React aplicar a atualização
           // teriamos um busState desatualizado
-          setBusState(prevState => detectBusState(prevState, newCoords, buses, route));
+          console.log("aa, estado atual do busstate:", busStateRef.current);
+          //setBusState(prevState => detectBusState(prevState, newCoords, currentBuses, currentRoute));
+          const newBusState = detectBusState(busStateRef.current, newCoords, currentBuses, currentRoute);
+          busStateRef.current = newBusState;
+          setBusState(newBusState);
         }
       });
     })();
@@ -107,6 +134,16 @@ export default function Map() {
       });
     }
   }, [coords, isCentered]);
+
+
+  // imprimir
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Dentro do ônibus?", busState.insideBus);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [busState]);
 
   if (!coords) {
     return <ActivityIndicator size="large"/>;

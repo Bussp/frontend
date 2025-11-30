@@ -18,7 +18,7 @@ export default function BusesLayer({ buses }: Props) {
             longitude: bus.position.longitude,
           }}
           title={`Ônibus ${bus.id}`}
-          description={`Linha ${bus.route.bus_line}`}
+         /*description={`Linha ${bus.route.bus_line}`}*/
         >
           <FontAwesome5 name="bus-alt" size={24} color="white" />
         </Marker>

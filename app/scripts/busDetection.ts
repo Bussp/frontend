@@ -78,6 +78,7 @@ Pra detectar que o user saiu do onibus:
 */
 
 export function detectBusState(state: BusState, user: Coord, buses: Bus[], route: Coord[]): BusState {
+
   const now = Date.now();
   const dt = state.lastTime ? (now-state.lastTime)/1000 : 1;
 
@@ -117,21 +118,13 @@ export function detectBusState(state: BusState, user: Coord, buses: Bus[], route
   const busPassed = busPassedNear || busPassedViaTeleport;
   const userMoving = (userSpeed >= MIN_SPEED);
 
-  // aqui ó q detecta se o cara entrou no bus de fato
-  if (!state.insideBus) {
-    if (userNearRoute && busPassed && userMoving) {
-      return {
-        insideBus: true,
-        busId: nearestBus?.id ?? null,
-        lastBusPosition: busNow,
-        lastUserPosition: user,
-        lastTime: now,
-      };
-    }
+  console.log("passou perto?", busPassed, busPassedNear, busPassedViaTeleport);
 
+  // aqui ó q detecta se o cara entrou no bus de fato
+  if (userNearRoute && busPassed && userMoving) {
     return {
-      insideBus: false,
-      busId: null,
+      insideBus: true,
+      busId: nearestBus?.id ?? null,
       lastBusPosition: busNow,
       lastUserPosition: user,
       lastTime: now,
@@ -139,10 +132,11 @@ export function detectBusState(state: BusState, user: Coord, buses: Bus[], route
   }
 
   // aqui ó q detecta se o cara saiu do bus
-  if (state.insideBus && busNow) {
+  if (busNow) {
     const d = dist(user, busNow);
-
+    console.log("d grande! user:", user, "busNow:", busNow, "d:", d);
     if (d > EXIT_DISTANCE) {
+
       return {
         insideBus: false,
         busId: null,
@@ -160,13 +154,4 @@ export function detectBusState(state: BusState, user: Coord, buses: Bus[], route
       lastTime: now,
     };
   }
-
-  // só pra fallback
-  return {
-    insideBus: state.insideBus,
-    busId: state.busId,
-    lastBusPosition: busNow,
-    lastUserPosition: user,
-    lastTime: now,
-  };
 }
