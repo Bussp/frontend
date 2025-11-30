@@ -19,12 +19,12 @@ async function runTests() {
       email,
       password,
     });
-    console.log("✅ registerUser OK!");
+    console.log("1/5 registerUser OK!");
 
     // 2) faz login
     console.log("Teste 2: loginUser...");
     await loginUser(email, password);
-    console.log("✅ loginUser OK!");
+    console.log("2/5 loginUser OK!");
 
     // 3) tenta pegar history SEM histórico
     console.log("Teste 3: getUserHistory (sem histórico)...");
@@ -33,7 +33,7 @@ async function runTests() {
       await getUserHistory({ email });
     } catch (err) {
       failedNoHistory = true;
-      console.log("✅ getUserHistory falhou como esperado (usuário sem histórico).");
+      console.log("3/5 getUserHistory falhou como esperado (usuário sem histórico).");
     }
     assert.ok(
       failedNoHistory,
@@ -54,7 +54,7 @@ async function runTests() {
 
     const tripResult = await createTrip(tripPayload);
     assert.equal(typeof tripResult.score, "number");
-    console.log("✅ createTrip OK! Score:", tripResult.score);
+    console.log("4/5 createTrip OK! Score:", tripResult.score);
 
     // 5) agora pega history COM histórico
     console.log("Teste 5: getUserHistory (com histórico)...");
@@ -68,10 +68,10 @@ async function runTests() {
     assert.equal(typeof first.date, "string");
     assert.equal(typeof first.score, "number");
 
-    console.log("✅ getUserHistory OK! Trips:", history.trips.length);
-    console.log("\n🎉 TODOS TESTES DE HISTORY PASSARAM!\n");
+    console.log("5/5 getUserHistory OK! Trips:", history.trips.length);
+    console.log("\n TODOS TESTES DE HISTORY PASSARAM!\n");
   } catch (err) {
-    console.error("\n❌ FALHOU:", err);
+    console.error("\n FALHOU:", err);
     process.exit(1);
   }
 }
