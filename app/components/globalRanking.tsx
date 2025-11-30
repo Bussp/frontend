@@ -1,14 +1,8 @@
-import { FlatList, View, ListRenderItem, Text, ScrollView } from "react-native";
 import { DataTable } from 'react-native-paper';
 import { styleGlobalRanking, styleGlobalRankingHeader, styleGlobalRankingLine } from "../styles/stylesRanking";
+import { GlobalRankResponse } from '@/api/src/models/ranking.types';
 
-interface RankingInterface {
-    position : number,
-    name : string,
-    score : number
-}
-
-export default function RankingGlobal({ DataArray }: { DataArray: RankingInterface[] }) {
+export default function RankingGlobal({ DataArray }: { DataArray: GlobalRankResponse[] }) {
     return (
         <DataTable style={styleGlobalRanking.container}>
             <DataTable.Header style={styleGlobalRankingHeader.container}>
@@ -23,9 +17,9 @@ export default function RankingGlobal({ DataArray }: { DataArray: RankingInterfa
                 <DataTable.Cell numeric>Pontos</DataTable.Cell>
             </DataTable.Row>
 
-            {DataArray.map((item) => (
-                <DataTable.Row key={item.position.toString()} style={styleGlobalRankingLine.row}>
-                    <DataTable.Cell>#{item.position}</DataTable.Cell>
+            {DataArray.map((item, index) => (
+                <DataTable.Row key={index + 1} style={styleGlobalRankingLine.row}>
+                    <DataTable.Cell>#{index + 1}</DataTable.Cell>
                     <DataTable.Cell>{item.name}</DataTable.Cell>
                     <DataTable.Cell numeric>{item.score}</DataTable.Cell>
                 </DataTable.Row>
