@@ -22,8 +22,6 @@ export default function Map() {
   const [coords, setCoords] = useState<Coord | null>(null);
   const [isCentered, setIsCentered] = useState(true);
 
-  const mapRef = useRef<MapView>(null);
-
   // rota + estado de o usuário está no onibus ou n
   const [route, setRoute] = useState<Coord[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
@@ -38,26 +36,17 @@ export default function Map() {
     closeCount: 0,
   });
 
-
   // refs para garantir que o callback veja os valores atualizados
   const routeRef = useRef<Coord[]>([]);
   const busesRef = useRef<Bus[]>([]);
   const busStateRef = useRef<BusState>(busState);
+  const mapRef = useRef<MapView>(null);
 
-  useEffect(() => {
-    routeRef.current = route;
-  }, [route]);
+  useEffect(() => { routeRef.current = route; }, [route]);
+  useEffect(() => { busesRef.current = buses; }, [buses]);
+  useEffect(() => { busStateRef.current = busState; }, [busState]);
 
-  useEffect(() => {
-    busesRef.current = buses;
-  }, [buses]);
-
-  useEffect(() => {
-    busStateRef.current = busState;
-  }, [busState]);
-
-
-  // esse userEffect é pra pegar as posicoes dos onibus a cada 1 segundo
+  // pegar as posicoes dos onibus a cada 1 segundo
   useEffect(() => {
     let interval: NodeJS.Timer;
 
@@ -68,7 +57,7 @@ export default function Map() {
         interval = setInterval(async () => {
           const busesData = await fetchBusPositions(monitoredRoutes);
           setBuses(busesData);
-        }, 1000); // podia ser mais, menos?
+        }, 1000); // podia ser mais, menos? <- isso é algo a pensar
 
       } catch (err) {
         console.error("Erro ao buscar posições dos ônibus:", err);
@@ -80,7 +69,7 @@ export default function Map() {
     };
   }, []);
 
-  // userEffect é pra pegar as coordenadas da rota
+  // pegar as coordenadas da rota
   useEffect(() => {
       (async () => {
         const routeCoords = await getShapeForRoute(monitoredRoutes[0].bus_line);
@@ -110,12 +99,6 @@ export default function Map() {
         const currentBuses = busesRef.current;
 
         if (currentRoute.length > 0 && currentBuses.length > 0) {
-          // const newBusState = detectBusState(busState, newCoords, buses, route);
-          // setBusState(newBusState)
-          // resolvi tirar pq isso n atualiza o estado imediatamente e só enfileira a atualização
-          // ent se outro callback do watchUserLocation disparar antes do React aplicar a atualização
-          // teriamos um busState desatualizado
-          //setBusState(prevState => detectBusState(prevState, newCoords, currentBuses, currentRoute));
           const newBusState = detectBusState(busStateRef.current, newCoords, currentBuses, currentRoute);
           busStateRef.current = newBusState;
           setBusState(newBusState);
@@ -143,7 +126,6 @@ export default function Map() {
   useEffect(() => {
     const interval = setInterval(() => {
     }, 5000);
-
     return () => clearInterval(interval);
   }, [busState]);
 
@@ -206,7 +188,7 @@ export default function Map() {
       )}
 
       {busState.insideBus && (
-        <Text style={styles.busStatus}>Dentro do ônibus{busState.busId}</Text>
+        <Text style={styles.busStatus}>Dentro do ônibus {busState.busId}</Text>
       )}
     </View>
   );
