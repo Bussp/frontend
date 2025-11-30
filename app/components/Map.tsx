@@ -1,47 +1,94 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import 'react-native-gesture-handler';
 import MapView, { Marker } from 'react-native-maps';
-import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+
+import { RouteIdentifier } from "../api/models/routes.types";
+import { fetchBusPositions } from "../mocks/getBuses";
+import { Bus, BusState, Coord } from "../models/buses";
+import { detectBusState } from "../scripts/busDetection";
+import { getShapeForRoute } from "../scripts/getBusRouteShape";
+// import { getShapeForRoute } from "../mocks/getBusRouteShape";
+import { checkPermission, watchUserLocation } from "../mocks/getLocation";
+
 import BottomSheetMenu from "./BottomSheetMenu";
-import BusesLayer, { BusGroup } from './BusesLayer';
+import BusesLayer from "./BusesLayer";
+import BusStopsLayer from "./BusStopsLayer";
+import PolylineLayer from "./PolylineLayer";
 
+// pra testes!! vamo monitorar a linha 84
+const monitoredRoutes: RouteIdentifier[] = [
+  { bus_line: "8084-10", bus_direction: 1 },
+];
 
-// maybe considerar os mapas do Expo e nao no React Native?
-// fica menos parecido com o Google Maps, talvez?
 export default function Map() {
-  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [coords, setCoords] = useState<Coord | null>(null);
   const [isCentered, setIsCentered] = useState(true);
-  
-  
-  const mapRef = useRef<MapView>(null);
+
+  // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
-  const [busesCoords, setBusesCoords] = useState<BusGroup[]>([]);
-  
+  const [route, setRoute] = useState<Coord[]>([]);
+  const [buses, setBuses] = useState<Bus[]>([]);
+  const [busState, setBusState] = useState<BusState>({
+    insideBus: false,
+    busId: null,
+    lastBusPosition: null,
+    lastUserPosition: null,
+    lastTime: null,
+    distHistory: Array(10).fill(Infinity),
+    distIndex: 0,
+    closeCount: 0,
+  });
 
+  // refs para garantir que o callback veja os valores atualizados
+  const routeRef = useRef<Coord[]>([]);
+  const busesRef = useRef<Bus[]>([]);
+  const busStateRef = useRef<BusState>(busState);
+  const mapRef = useRef<MapView>(null);
+
+  useEffect(() => { routeRef.current = route; }, [route]);
+  useEffect(() => { busesRef.current = buses; }, [buses]);
+  useEffect(() => { busStateRef.current = busState; }, [busState]);
+
+  // pegar as posicoes dos onibus a cada 1 segundo
   useEffect(() => {
-      if (!currentLine) return;
+    let interval: NodeJS.Timer;
 
-      const fetchBuses = async () => {
-        try {
-          console.log(currentLine)
-          // const res = await getBuses(currentLine);
-          // const groups = convertToBusGroup(res);
-          // setBusGroups(groups);
-        } catch (error) {
-          console.error("Erro ao buscar ônibus: ", error);
-        }
-      };
+    const startFetchingBuses = async () => {
+      try {
+        const busesData = await fetchBusPositions(monitoredRoutes);
+        setBuses(busesData);
+        interval = setInterval(async () => {
+          const busesData = await fetchBusPositions(monitoredRoutes);
+          setBuses(busesData);
+        }, 1000); // podia ser mais, menos? <- isso é algo a pensar
 
-      fetchBuses();
+      } catch (err) {
+        console.error("Erro ao buscar posições dos ônibus:", err);
+      }
+    };
+    startFetchingBuses();
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, []);
 
-      const interval = setInterval(fetchBuses, 5000);
+  // pegar as coordenadas da rota
+  useEffect(() => {
+      (async () => {
+        const routeCoords = await getShapeForRoute(monitoredRoutes[0].bus_line);
+        setRoute(routeCoords.points);
+      })();
+    }, []);
 
-      return () => clearInterval(interval);
-  }, [currentLine]);
-  
+  // aqui precisa ser coletado as coordenadas do ponto de onibus
+  const busStopsTest: Coord[] = [
+    { latitude: 37.448548, longitude: -122.120818 },
+    { latitude: 37.409179, longitude: -122.067407 },
+  ];
+
   useEffect(() => {
     let subscription: any;
 
@@ -54,6 +101,14 @@ export default function Map() {
 
       subscription = await watchUserLocation((newCoords) => {
         setCoords(newCoords);
+        const currentRoute = routeRef.current;
+        const currentBuses = busesRef.current;
+
+        if (currentRoute.length > 0 && currentBuses.length > 0) {
+          const newBusState = detectBusState(busStateRef.current, newCoords, currentBuses, currentRoute);
+          busStateRef.current = newBusState;
+          setBusState(newBusState);
+        }
       });
     })();
 
@@ -72,10 +127,17 @@ export default function Map() {
     }
   }, [coords, isCentered]);
 
+  // imprimir
+  useEffect(() => {
+    const interval = setInterval(() => {
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [busState]);
+
+
   if (!coords) {
     return <ActivityIndicator size="large"/>;
   }
-
 
   function recenter() {
     if (mapRef.current && coords) {
@@ -99,6 +161,7 @@ export default function Map() {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
+        customMapStyle={mapStyle}
         zoomEnabled={true}
         zoomControlEnabled={true}
         onPanDrag={() => setIsCentered(false)}
@@ -112,25 +175,24 @@ export default function Map() {
           }
         }}
       >
-          <Marker
-            coordinate={{
-              latitude: coords.latitude,
-              longitude: coords.longitude,
-            }}
-          >
-            <View style={styles.userMarker}/>
-          </Marker>
 
-          {currentLine!==null && <BusesLayer line={currentLine} groups={busesCoords} />}
-
+      <Marker
+        coordinate={{
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }}>
+        <View style={styles.userMarker}/>
+      </Marker>
+        <PolylineLayer points={route} />
+        <BusStopsLayer stops={busStopsTest} />
+        {currentLine!==null && <BusesLayer line={currentLine} buses={buses} />}
       </MapView>
 
       {!isCentered && (
-        <TouchableOpacity style={[styles.absoluteButtons, styles.recenterButton]} onPress={recenter}>
-          <AntDesign name="aim" size={20} color="black"/>
+        <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
+          <Text style={styles.recenterText}>Centralizar</Text>
         </TouchableOpacity>
       )}
-
 
       <TouchableOpacity style={[styles.absoluteButtons, styles.communityButton]}>
           <FontAwesome name="users" size={20} color="black"/>
@@ -140,7 +202,11 @@ export default function Map() {
       </TouchableOpacity>
 
       <BottomSheetMenu {...{setCurrentLine}}/>
-        
+
+      {busState.insideBus && (
+        <Text style={styles.busStatus}>Dentro do ônibus {busState.busId}</Text>
+      )}
+
     </View>
   );
 }
@@ -160,6 +226,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFFFFF',
   },
+  recenterText: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+  busStatus: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    backgroundColor: '#38761D',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    elevation: 4,
+  },
   absoluteButtons: {
     position: "absolute",
     backgroundColor: "white",
@@ -174,7 +254,7 @@ const styles = StyleSheet.create({
   },
   recenterButton: {
     top: 40,
-    left: 20, 
+    right: 20,
   },
   profileButton: {
     top: 40,
@@ -185,3 +265,13 @@ const styles = StyleSheet.create({
     right: 70, 
   },
 });
+
+const mapStyle = [
+  {
+    featureType: "poi",
+    elementType: "labels",
+    stylers: [
+      { visibility: "off" }
+    ]
+  }
+];
