@@ -77,6 +77,7 @@ export default function Map() {
       })();
     }, []);
 
+  // aqui precisa ser coletado as coordenadas do ponto de onibus
   const busStopsTest: Coord[] = [
     { latitude: 37.448548, longitude: -122.120818 },
     { latitude: 37.409179, longitude: -122.067407 },
