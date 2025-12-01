@@ -15,6 +15,8 @@ import BottomSheetMenu from "./BottomSheetMenu";
 import BusesLayer from "./BusesLayer";
 import BusStopsLayer from "./BusStopsLayer";
 import PolylineLayer from "./PolylineLayer";
+import { router, useRouter } from "expo-router";
+import { useRoute } from "@react-navigation/native";
 
 // pra testes!! vamo monitorar a linha 84
 const monitoredRoutes: RouteIdentifier[] = [
@@ -156,6 +158,8 @@ export default function Map() {
     }
   }
 
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
 
@@ -197,11 +201,14 @@ export default function Map() {
 
       {!isCentered && (
         <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
-          <Text style={styles.recenterText}>Centralizar</Text>
+          <Text 
+            style={styles.recenterText}>Centralizar</Text>
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={[styles.absoluteButtons, styles.communityButton]}>
+      <TouchableOpacity 
+        style={[styles.absoluteButtons, styles.communityButton]}
+        onPress={() => router.navigate('/ranking')}>
           <FontAwesome name="users" size={20} color="black"/>
       </TouchableOpacity>
       <TouchableOpacity style={[styles.absoluteButtons, styles.profileButton]}>
