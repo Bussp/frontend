@@ -15,6 +15,7 @@ export default function BusStopsLayer({ stops }: Props) {
         <Marker
           key={index}
           coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
+          anchor={{ x: 0.5, y: 0 }}
         >
           <MaterialCommunityIcons name="bus-stop" size={24} color="#FFBB11" />
         </Marker>

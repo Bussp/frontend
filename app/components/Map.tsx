@@ -5,9 +5,9 @@ import MapView, { Marker } from 'react-native-maps';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { RouteIdentifier } from "../api/models/routes.types";
 import { Bus, BusState, Coord } from "../models/buses";
 import { detectBusState } from "../scripts/busDetection";
+import { fetchBusDetails, fetchBusPositions } from "../scripts/getBuses";
 import { getShapeForRoute } from "../scripts/getBusRouteShape";
 import { checkPermission, watchUserLocation } from "../scripts/getLocation";
 
@@ -16,11 +16,6 @@ import BusesLayer from "./BusesLayer";
 import BusStopsLayer from "./BusStopsLayer";
 import PolylineLayer from "./PolylineLayer";
 
-// pra testes!! vamo monitorar a linha 84
-const monitoredRoutes: RouteIdentifier[] = [
-  { bus_line: "8084-10", bus_direction: 1 },
-];
-
 export default function Map() {
   const [coords, setCoords] = useState<Coord | null>(null);
   const [isCentered, setIsCentered] = useState(true);
@@ -28,6 +23,7 @@ export default function Map() {
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [route, setRoute] = useState<Coord[]>([]);
+  const [stops, setStops] = useState<Coord[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [busState, setBusState] = useState<BusState>({
     insideBus: false,
@@ -35,7 +31,7 @@ export default function Map() {
     lastBusPosition: null,
     lastUserPosition: null,
     lastTime: null,
-    distHistory: Array(10).fill(Infinity),
+    distHistory: Array(10).fill(Infinity), // <-- esse "10" é ajustável, tem q arrumar de acordo com a necessidade
     distIndex: 0,
     closeCount: 0,
   });
@@ -43,11 +39,13 @@ export default function Map() {
   // refs para garantir que o callback veja os valores atualizados
   const routeRef = useRef<Coord[]>([]);
   const busesRef = useRef<Bus[]>([]);
+  const stopsRef = useRef<Coord[]>([]);
   const busStateRef = useRef<BusState>(busState);
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => { routeRef.current = route; }, [route]);
   useEffect(() => { busesRef.current = buses; }, [buses]);
+  useEffect(() => { stopsRef.current = stops; }, [stops]);
   useEffect(() => { busStateRef.current = busState; }, [busState]);
 
   // pegar as posicoes dos onibus a cada 1 segundo
@@ -67,17 +65,32 @@ export default function Map() {
       }
     })();
 
-    /*
-    let interval: NodeJS.Timer;
+    let interval: ReturnType<typeof setInterval>;
     const startFetchingBuses = async () => {
 
       try {
-        const busesData = await fetchBusPositions(monitoredRoutes);
-        setBuses(busesData);
-        interval = setInterval(async () => {
-          const busesData = await fetchBusPositions(monitoredRoutes);
-          setBuses(busesData);
-        }, 1000); // podia ser mais, menos? <- isso é algo a pensar
+        // é melhor pegar os detalhes da rota 1 vez
+        // e dai ficar pegando as posições do onibus varias vezes
+        const details = await fetchBusDetails(currentLine, 1); // po por enquanto ta 1 mas tem q ver como q manda a direcao da linha pra ca
+        if (!details) {
+          console.error("Não foi possível obter detalhes da linha");
+          return;
+        }
+
+        // po bem aqui q tem q fazer o fetch das paradas de ônibus
+        // finge q eu fiz algo do tipo const collectedBusStops = await fetchBusStops(details);
+        const collectedBusStops: Coord[] = [ { latitude: 37.448548, longitude: -122.120818 },{ latitude: 37.409179, longitude: -122.067407 },];
+        setStops(collectedBusStops);
+
+        const initialPositions = await fetchBusPositions(details);
+        setBuses(initialPositions);
+
+        interval = setInterval(() => { 
+          (async () => {
+            const updatedPositions = await fetchBusPositions(details);
+            setBuses(updatedPositions);
+          })();
+        }, 1000); // podia ser mais, menos? <- isso é algo a se pensar
 
       } catch (err) {
         console.error("Erro ao buscar posições dos ônibus:", err);
@@ -87,14 +100,14 @@ export default function Map() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  */
+  
   }, [currentLine]);
 
-  // aqui precisa ser coletado as coordenadas do ponto de onibus
-  const busStopsTest: Coord[] = [
-    { latitude: 37.448548, longitude: -122.120818 },
-    { latitude: 37.409179, longitude: -122.067407 },
-  ];
+  // NOTA!! a variável booleana busState.insideBus é que informa se o cara tá dentro ou nao do bus
+  // usar isso pra calcular distancia percorrida, tempo de viagem, etc etc
+  // talvez ela precise de uns ajustes de constantes dentro do app/scripts/busDetection.
+  // em particular a quantas posições passadas nos preocuparemos (no momento são 10)
+  // e em quantos por cento do tempo o user precisa estar perto do bus pra contar (no momento são 40%)
 
   useEffect(() => {
     let subscription: any;
@@ -191,7 +204,7 @@ export default function Map() {
         <View style={styles.userMarker}/>
       </Marker>
         <PolylineLayer points={route} />
-        <BusStopsLayer stops={busStopsTest} />
+        {currentLine!== null && <BusStopsLayer stops={stops} />}
         {currentLine!==null && <BusesLayer line={currentLine} buses={buses} />}
       </MapView>
 
