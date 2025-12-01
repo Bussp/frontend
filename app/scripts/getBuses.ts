@@ -41,8 +41,8 @@ export async function fetchBusPositions(detailsResponse: RoutesDetailsResponse):
       id: idx.toString(),
       type: b.route.bus_direction,
       position: {
-        latitude: 1000000*b.position.latitude,
-        longitude: 1000000*b.position.longitude,
+        latitude: b.position.latitude,
+        longitude: b.position.longitude,
       },
     }));
   } catch (err) {
