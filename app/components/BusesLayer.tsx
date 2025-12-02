@@ -14,8 +14,9 @@ export default function BusesLayer({ line, buses }: Props) {
     <>
       {buses.map((bus) =>
         <Marker
-          key={`${line}: Sentido ${bus.type}`}
+          key={`${line} (${bus.id}): Sentido ${bus.type}`}
           coordinate={{ latitude: bus.position.latitude, longitude: bus.position.longitude }}
+          anchor={{ x: 0.5, y: 0 }}
         >
           <FontAwesome5
             name="bus-alt"

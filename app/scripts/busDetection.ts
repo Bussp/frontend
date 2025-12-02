@@ -1,5 +1,3 @@
-import haversine from "haversine-distance";
-
 export interface Coord {
   latitude: number;
   longitude: number;
