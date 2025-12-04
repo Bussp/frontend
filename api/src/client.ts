@@ -1,7 +1,9 @@
 // api/src/client.ts
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 
-const API_URL = "http://56.124.99.21:8000"; // sua URL local do FastAPI
+// Lê a URL da API das variáveis de ambiente
+// Fallback para localhost se não estiver configurado
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
 
 class APIClient {
   private client: AxiosInstance;
