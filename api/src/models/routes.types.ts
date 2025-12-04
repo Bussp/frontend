@@ -1,50 +1,63 @@
-// Entrada do /routes/details
-export type RouteIdentifier = {
-  bus_line: string;
-  bus_direction: number;
-};
+import type { Coordinate, RouteIdentifier } from "./common.types";
 
-// Saída do /routes/details e ENTRADA do /routes/positions
-export type BusRoute = {
+export { Coordinate, RouteIdentifier };
+
+export interface BusRouteRequest {
+  route_id: number;
+}
+
+export interface BusRouteResponse {
   route_id: number;
   route: RouteIdentifier;
-};
+  is_circular: boolean;
+  terminal_name: string;
+}
 
-export type Coordinates = {
-  latitude: number;
-  longitude: number;
-};
-
-export type BusPosition = {
-  route: RouteIdentifier; // backend devolve apenas o identificador simples
-  position: Coordinates;
+export interface BusPosition {
+  route_id: number;
+  position: Coordinate;
   time_updated: string; // ISO datetime
-};
+}
 
 /**
- * /routes/details
+ * Request for POST /routes/positions.
  */
-export type RoutesDetailsRequest = {
-  routes: RouteIdentifier[];
-};
-
-export type RoutesDetailsResponse = {
-  routes: BusRoute[];
-};
+export interface BusPositionsRequest {
+  routes: BusRouteRequest[];
+}
 
 /**
- * /routes/positions
+ * Response from POST /routes/positions.
  */
-export type RoutesPositionsRequest = {
-  routes: BusRoute[];
-};
-
-export type RoutesPositionsResponse = {
+export interface BusPositionsResponse {
   buses: BusPosition[];
-};
+}
+
+/**
+ * Response from GET /routes/search.
+ */
+export interface RouteSearchResponse {
+  routes: BusRouteResponse[];
+}
 
 export interface RouteShapeResponse {
-  route_id: string;
+  route: RouteIdentifier;
   shape_id: string;
-  points: Coordinates[];
+  points: Coordinate[];
 }
+
+/**
+ * Request for POST /routes/shapes.
+ */
+export interface RouteShapesRequest {
+  routes: RouteIdentifier[];
+}
+
+/**
+ * Response from POST /routes/shapes.
+ */
+export interface RouteShapesResponse {
+  shapes: RouteShapeResponse[];
+}
+
+
