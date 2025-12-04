@@ -1,7 +1,9 @@
 import { Stack } from "expo-router";
+import { QueryProvider } from "../api/src/providers/QueryProvider";
 
 export default function RootLayout() {
   return (
+    <QueryProvider>
       <Stack>
           <Stack.Screen 
             name="index" 
@@ -36,5 +38,6 @@ export default function RootLayout() {
               headerTitleAlign: "center"
             }}/>
       </Stack>
+    </QueryProvider>
   );
 }

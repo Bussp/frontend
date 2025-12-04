@@ -1,21 +1,27 @@
-// api/users.types.ts
+// api/src/models/users.types.ts
 
-// Resposta básica de usuário que o backend retorna
+/**
+ * User information returned by the backend.
+ */
 export interface User {
   name: string;
   email: string;
   score: number;
 }
 
-// Corpo do POST /users/register
-export interface RegisterRequest {
+/**
+ * Request body for POST /users/register.
+ */
+export interface UserCreateAccountRequest {
   name: string;
   email: string;
   password: string;
 }
 
-// Resposta do POST /users/login
-export interface LoginResponse {
+/**
+ * Response from POST /users/login.
+ */
+export interface TokenResponse {
   access_token: string;
   token_type: "bearer";
 }

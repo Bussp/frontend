@@ -1,18 +1,17 @@
-// api/models/trips.types.ts
+import type { RouteIdentifier } from "./common.types";
 
-export interface TripRouteInfo {
-    bus_line: string;
-    bus_direction: number;
-  }
-  
-  export interface TripCreateRequest {
-    email: string;
-    route: TripRouteInfo;
-    distance: number;
-    data: string; // ISO date string, ex: new Date().toISOString()
-  }
-  
-  export interface TripCreateResponse {
-    score: number;
-  }
-  
+/**
+ * Request body for POST /trips/.
+ */
+export interface CreateTripRequest {
+  route: RouteIdentifier;
+  distance: number;
+  trip_datetime: string; // ISO datetime string
+}
+
+/**
+ * Response from POST /trips/.
+ */
+export interface CreateTripResponse {
+  score: number;
+}

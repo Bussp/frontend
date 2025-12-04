@@ -1,18 +1,15 @@
-export interface RankUserRequest {
-  email: string;
-}
+import type { User } from "./users.types";
 
-export interface RankUserResponse {
+/**
+ * Response from GET /rank/user.
+ */
+export interface UserRankingResponse {
   position: number;
 }
 
-export interface RankedUser {
-  name: string;
-  email: string;
-  score: number;
+/**
+ * Response from GET /rank/global.
+ */
+export interface GlobalRankingResponse {
+  users: User[];
 }
-
-export interface GlobalRankResponse {
-  users: RankedUser[];
-}
-  

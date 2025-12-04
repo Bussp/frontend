@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
-import { getUserHistory } from "../src/history";
-import { TripCreateRequest } from "../src/models/trips.types";
-import { createTrip } from "../src/trips";
-import { loginUser, registerUser } from "../src/users";
+import type { CreateTripRequest } from "../../models/trips.types";
+import { getUserHistory } from "../history";
+import { createTrip } from "../trips";
+import { loginUser, registerUser } from "../users";
 
 async function runTests() {
   console.log("== Teste History API ==");
@@ -30,10 +30,12 @@ async function runTests() {
     console.log("Teste 3: getUserHistory (sem histórico)...");
     let failedNoHistory = false;
     try {
-      await getUserHistory({ email });
+      await getUserHistory();
     } catch (err) {
       failedNoHistory = true;
-      console.log("3/5 getUserHistory falhou como esperado (usuário sem histórico).");
+      console.log(
+        "3/5 getUserHistory falhou como esperado (usuário sem histórico)."
+      );
     }
     assert.ok(
       failedNoHistory,
@@ -42,14 +44,13 @@ async function runTests() {
 
     // 4) cria uma trip
     console.log("Teste 4: createTrip (para gerar histórico)...");
-    const tripPayload: TripCreateRequest = {
-      email,
+    const tripPayload: CreateTripRequest = {
       route: {
         bus_line: "3090-10",
         bus_direction: 1,
       },
       distance: 5000.0,
-      data: new Date().toISOString(),
+      trip_datetime: new Date().toISOString(),
     };
 
     const tripResult = await createTrip(tripPayload);
@@ -58,11 +59,14 @@ async function runTests() {
 
     // 5) agora pega history COM histórico
     console.log("Teste 5: getUserHistory (com histórico)...");
-    const history = await getUserHistory({ email });
+    const history = await getUserHistory();
 
     assert.ok(history);
     assert.ok(Array.isArray(history.trips));
-    assert.ok(history.trips.length > 0, "history.trips não deveria estar vazio");
+    assert.ok(
+      history.trips.length > 0,
+      "history.trips não deveria estar vazio"
+    );
 
     const first = history.trips[0];
     assert.equal(typeof first.date, "string");

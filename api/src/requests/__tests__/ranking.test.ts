@@ -1,10 +1,10 @@
-// api/test/rank.test.ts
+// api/src/requests/__tests__/ranking.test.ts
 import assert from "node:assert/strict";
 
-import type { TripCreateRequest } from "../src/models/trips.types";
-import { getGlobalRank, getUserRank } from "../src/ranking";
-import { createTrip } from "../src/trips";
-import { loginUser, registerUser } from "../src/users";
+import type { CreateTripRequest } from "../../models/trips.types";
+import { getGlobalRanking, getUserRanking } from "../ranking";
+import { createTrip } from "../trips";
+import { loginUser, registerUser } from "../users";
 
 async function runTests() {
   console.log("== Teste Ranking API ==");
@@ -34,14 +34,13 @@ async function runTests() {
 
     // 3) cria trip
     console.log("Teste 3: createTrip...");
-    const payload: TripCreateRequest = {
-      email,
+    const payload: CreateTripRequest = {
       route: {
         bus_line: "8000-10",
         bus_direction: 1,
       },
       distance: 5000.0,
-      data: new Date().toISOString(),
+      trip_datetime: new Date().toISOString(),
     };
     const tripResult = await createTrip(payload);
 
@@ -51,20 +50,20 @@ async function runTests() {
     // Agora o apiClient já tem o token salvo
 
     // -------------------------
-    console.log("Passo 4: getUserRank...");
+    console.log("Passo 4: getUserRanking...");
 
-    const rank = await getUserRank({ email });
+    const rank = await getUserRanking();
 
     assert.ok(rank);
     assert.equal(typeof rank.position, "number");
 
     console.log("Posição retornada:", rank.position);
-    console.log("4/5 getUserRank OK!");
+    console.log("4/5 getUserRanking OK!");
 
     // -------------------------
-    console.log("Passo 5: getGlobalRank...");
+    console.log("Passo 5: getGlobalRanking...");
 
-    const global = await getGlobalRank();
+    const global = await getGlobalRanking();
 
     assert.ok(global);
     assert.ok(Array.isArray(global.users));
@@ -76,10 +75,9 @@ async function runTests() {
     assert.equal(typeof first.score, "number");
 
     console.log("Total usuários no ranking:", global.users.length);
-    console.log("5/5 getGlobalRank OK!");
+    console.log("5/5 getGlobalRanking OK!");
 
     console.log("\n TODOS TESTES DE RANK PASSARAM!\n");
-
   } catch (err) {
     console.error("\n FALHOU:", err);
     process.exit(1);
