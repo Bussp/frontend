@@ -5,18 +5,17 @@ import MapView, { Marker } from 'react-native-maps';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
+import { useRouteShapes } from "../../api/src/hooks/useRoutes";
 import { Bus, BusState, Coord } from "../models/buses";
 import { detectBusState } from "../scripts/busDetection";
 import { fetchBusDetails, fetchBusPositions } from "../scripts/getBuses";
-import { getShapeForRoute } from "../scripts/getBusRouteShape";
 import { checkPermission, watchUserLocation } from "../scripts/getLocation";
 
+import { useRouter } from "expo-router";
 import BottomSheetMenu from "./BottomSheetMenu";
 import BusesLayer from "./BusesLayer";
 import BusStopsLayer from "./BusStopsLayer";
 import PolylineLayer from "./PolylineLayer";
-import { router, useRouter } from "expo-router";
-import { useRoute } from "@react-navigation/native";
 
 export default function Map() {
   const [coords, setCoords] = useState<Coord | null>(null);
@@ -24,6 +23,7 @@ export default function Map() {
 
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
+  const [currentDirection, setCurrentDirection] = useState<number>(1);
   const [route, setRoute] = useState<Coord[]>([]);
   const [stops, setStops] = useState<Coord[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
@@ -36,6 +36,14 @@ export default function Map() {
     distHistory: Array(10).fill(Infinity), // <-- esse "10" é ajustável, tem q arrumar de acordo com a necessidade
     distIndex: 0,
     closeCount: 0,
+  });
+
+  // Use the hook to fetch route shapes
+  const routeIdentifiers = currentLine 
+    ? [{ bus_line: currentLine, bus_direction: currentDirection }]
+    : [];
+  const { data: shapesData } = useRouteShapes(routeIdentifiers, {
+    enabled: !!currentLine
   });
 
   // refs para garantir que o callback veja os valores atualizados
@@ -58,14 +66,10 @@ export default function Map() {
       return;
     }
 
-    (async () => {
-      try {
-        const routeCoords = await getShapeForRoute(currentLine);
-        setRoute(routeCoords.points);
-      } catch (err) {
-        console.error("Erro ao buscar rota:", err);
-      }
-    })();
+    // Update route when shapes data is available
+    if (shapesData?.shapes && shapesData.shapes.length > 0) {
+      setRoute(shapesData.shapes[0].points);
+    }
 
     let interval: ReturnType<typeof setInterval>;
     const startFetchingBuses = async () => {
@@ -73,7 +77,7 @@ export default function Map() {
       try {
         // é melhor pegar os detalhes da rota 1 vez
         // e dai ficar pegando as posições do onibus varias vezes
-        const details = await fetchBusDetails(currentLine, 1); // po por enquanto ta 1 mas tem q ver como q manda a direcao da linha pra ca
+        const details = await fetchBusDetails(currentLine, currentDirection);
         if (!details) {
           console.error("Não foi possível obter detalhes da linha");
           return;
@@ -103,7 +107,7 @@ export default function Map() {
       if (interval) clearInterval(interval);
     };
   
-  }, [currentLine]);
+  }, [currentLine, currentDirection, shapesData]);
 
   // NOTA!! a variável booleana busState.insideBus é que informa se o cara tá dentro ou nao do bus
   // usar isso pra calcular distancia percorrida, tempo de viagem, etc etc
