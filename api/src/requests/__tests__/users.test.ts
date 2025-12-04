@@ -1,6 +1,6 @@
-// api/test/users.test.ts
+// api/src/requests/__tests__/users.test.ts
 import assert from "node:assert/strict";
-import { getCurrentUser, getUserByEmail, loginUser, registerUser } from "../src/users";
+import { getCurrentUser, loginUser, registerUser } from "../users";
 
 async function runTests() {
   console.log("== Teste Users API ==");
@@ -14,13 +14,13 @@ async function runTests() {
     const user = await registerUser({
       name: "Test User",
       email,
-      password
+      password,
     });
 
     assert.equal(user.email, email);
     assert.equal(user.name, "Test User");
     assert.equal(typeof user.score, "number");
-    console.log("1/4 registerUser OK!");
+    console.log("1/3 registerUser OK!");
 
     // ----------------------
     console.log("Teste 2: loginUser...");
@@ -28,22 +28,15 @@ async function runTests() {
 
     assert.ok(login.access_token);
     assert.equal(login.token_type, "bearer");
-    console.log("token: ",login.access_token);
-    console.log("1/4 loginUser OK!");
+    console.log("token: ", login.access_token);
+    console.log("2/3 loginUser OK!");
 
     // ----------------------
     console.log("Teste 3: getCurrentUser...");
     const me = await getCurrentUser();
 
     assert.equal(me.email, email);
-    console.log("3/4 getCurrentUser OK!");
-
-    // ----------------------
-    console.log("Teste 4: getUserByEmail...");
-    const byEmail = await getUserByEmail(email);
-
-    assert.equal(byEmail.email, email);
-    console.log("4/4 getUserByEmail OK!");
+    console.log("3/3 getCurrentUser OK!");
 
     console.log("\n TODOS TESTES PASSARAM!\n");
   } catch (err) {

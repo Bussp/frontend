@@ -1,8 +1,8 @@
-// api/test/trips.test.ts
+// api/src/requests/__tests__/trips.test.ts
 import assert from "node:assert/strict";
-import type { TripCreateRequest } from "../src/models/trips.types";
-import { createTrip } from "../src/trips";
-import { loginUser, registerUser } from "../src/users";
+import type { CreateTripRequest } from "../../models/trips.types";
+import { createTrip } from "../trips";
+import { loginUser, registerUser } from "../users";
 
 async function runTests() {
   console.log("== Teste Trips API ==");
@@ -20,8 +20,6 @@ async function runTests() {
     });
     console.log("1/3 registerUser OK!");
 
-
-
     // 2) faz login (para setar o JWT no client)
     console.log("Teste 2: loginUser...");
     await loginUser(email, password);
@@ -29,14 +27,13 @@ async function runTests() {
 
     // 3) cria trip
     console.log("Teste 3: createTrip...");
-    const payload: TripCreateRequest = {
-      email,
+    const payload: CreateTripRequest = {
       route: {
         bus_line: "8000-10",
         bus_direction: 1,
       },
       distance: 5000.0,
-      data: new Date().toISOString(),
+      trip_datetime: new Date().toISOString(),
     };
     const tripResult = await createTrip(payload);
 
