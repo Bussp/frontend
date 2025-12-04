@@ -228,7 +228,9 @@ export default function Map() {
         onPress={() => router.navigate('/ranking')}>
           <FontAwesome name="users" size={20} color="black"/>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.absoluteButtons, styles.profileButton]}>
+      <TouchableOpacity 
+        style={[styles.absoluteButtons, styles.profileButton]}
+        onPress={() => router.navigate('/user')}>
           <FontAwesome name="user" size={20} color="black"/>
       </TouchableOpacity>
 
