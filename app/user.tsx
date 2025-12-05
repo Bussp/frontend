@@ -36,7 +36,7 @@ export default function UserScreen() {
     );
   };
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#0D8694" />
@@ -46,29 +46,13 @@ export default function UserScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.profileSection}>
-        <View style={styles.avatarContainer}>
-          <FontAwesome name="user-circle" size={100} color="#0D8694" />
-        </View>
-        
-        <Text style={styles.name}>{user.name}</Text>
-        <Text style={styles.email}>{user.email}</Text>
-        
-        <View style={styles.scoreContainer}>
-          <FontAwesome name="star" size={24} color="#F5A623" />
-          <Text style={styles.scoreText}>{user.score} pontos</Text>
-        </View>
-      </View>
-
-      <View style={styles.actionsSection}>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <FontAwesome name="sign-out" size={20} color="#fff" />
-          <Text style={styles.logoutButtonText}>Sair</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleLogout}
+      >
+        <FontAwesome name="sign-out" size={20} color="#fff" />
+        <Text style={styles.logoutButtonText}>Sair</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -76,44 +60,9 @@ export default function UserScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  profileSection: {
     backgroundColor: "#fff",
-    padding: 24,
+    justifyContent: "center",
     alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  avatarContainer: {
-    marginBottom: 16,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 16,
-  },
-  scoreContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f9f9f9",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 20,
-    gap: 8,
-  },
-  scoreText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  actionsSection: {
     padding: 20,
   },
   logoutButton: {
@@ -124,6 +73,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     gap: 10,
+    minWidth: 200,
   },
   logoutButtonText: {
     color: "#fff",
