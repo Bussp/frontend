@@ -5,11 +5,17 @@ import MapView, { Marker } from 'react-native-maps';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
+
 import { useRouteShapes } from "../../api/src/hooks/useRoutes";
+import { BusPositionsRequest, RouteShapesRequest } from "../../api/src/models/routes.types";
+import { getBusPositions, getRouteShapes, searchRoutes } from "../../api/src/requests/routes";
 import { Bus, BusState, Coord } from "../models/buses";
-import { detectBusState } from "../scripts/busDetection";
-import { fetchBusDetails, fetchBusPositions } from "../scripts/getBuses";
+import { computeScore, detectBusState, startScoring, stopScoring } from "../scripts/busDetection";
 import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+
+import type { CreateTripRequest } from "../../api/src/models/trips.types";
+import { createTrip } from "../../api/src/requests/trips";
+
 
 import { useRouter } from "expo-router";
 import BottomSheetMenu from "./BottomSheetMenu";
@@ -18,17 +24,23 @@ import BusStopsLayer from "./BusStopsLayer";
 import PolylineLayer from "./PolylineLayer";
 
 export default function Map() {
+  
   const [coords, setCoords] = useState<Coord | null>(null);
   const [isCentered, setIsCentered] = useState(true);
 
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [currentDirection, setCurrentDirection] = useState<number>(1);
+  const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
+
   const [route, setRoute] = useState<Coord[]>([]);
   const [stops, setStops] = useState<Coord[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [busState, setBusState] = useState<BusState>({
+    currentLine: null,
     insideBus: false,
+    scoring: false,
+    entryPosition: null,
     busId: null,
     lastBusPosition: null,
     lastUserPosition: null,
@@ -53,61 +65,155 @@ export default function Map() {
   const busStateRef = useRef<BusState>(busState);
   const mapRef = useRef<MapView>(null);
 
+
+  // essa função é a q calcula score. ele muda o estado do busStateRef.current e do busState e envia a mensagem para o back
+  async function finishScoring(
+    reason: string,
+    routeForScore?: Coord[],
+    userPosition?: Coord,
+  ) {
+    if (!busStateRef.current.scoring) {
+      return;
+    }
+  
+    const effectiveRoute = routeForScore ?? routeRef.current;
+    const effectiveCoords = userPosition ?? coords;
+  
+    if (!effectiveCoords || effectiveRoute.length === 0) {
+      // não temos dados suficientes pra pontuar
+      return;
+    }
+  
+    // 1) Calcula o score localmente
+    const localScore = computeScore(
+      busStateRef.current,
+      effectiveRoute,
+      effectiveCoords,
+    );
+  
+    // 2) Monta o payload da viagem
+    //    Aqui estou assumindo que a "rota" da viagem é a linha/direção atuais
+    //    (se você quiser, dá pra guardar isso dentro do próprio BusState na hora do startScoring).
+    let apiScore = localScore;
+  
+    try {
+      if (currentLine) {
+        const payload: CreateTripRequest = {
+          route: {
+            // Ajusta se o tipo RouteIdentifier tiver outro formato
+            bus_line: currentLine,
+            bus_direction: currentDirection,
+          },
+          // OBS: por enquanto estou usando o score como "distance",
+          //      porque o tipo da API não tem campo score.
+          //      Quando você tiver a distância real, troca aqui.
+          distance: localScore,
+          trip_datetime: new Date().toISOString(),
+        };
+  
+        const response = await createTrip(payload);
+        apiScore = response.score;
+      }
+  
+      // 3) Mostra a mensagem usando o score que veio da API (se deu certo) ou o local
+      alert(`Viagem finalizada (${reason})! Você ganhou ${apiScore} pontos.`);
+    } catch (err) {
+      console.error("Erro ao salvar viagem no backend:", err);
+      // fallback: pelo menos mostra o score local
+      alert(`Viagem finalizada (${reason})! Você ganhou ${localScore} pontos.`);
+    }
+  
+    // 4) Para a pontuação localmente
+    const stopped = stopScoring(busStateRef.current);
+    busStateRef.current = stopped;
+    setBusState(stopped);
+  }
+  
+  
+
   useEffect(() => { routeRef.current = route; }, [route]);
   useEffect(() => { busesRef.current = buses; }, [buses]);
   useEffect(() => { stopsRef.current = stops; }, [stops]);
   useEffect(() => { busStateRef.current = busState; }, [busState]);
 
-  // pegar as posicoes dos onibus a cada 1 segundo
+  
   useEffect(() => {
     if (!currentLine) {
+      // se vc desmarcou a linha conta o score
+      if(busStateRef.current.scoring){
+        finishScoring("linha desmarcada", routeRef.current, coords ?? undefined);
+
+      }
       setBuses([]);
       setRoute([]);
       return;
     }
 
-    // Update route when shapes data is available
-    if (shapesData?.shapes && shapesData.shapes.length > 0) {
-      setRoute(shapesData.shapes[0].points);
+    // se currentline mudou enquanto pontuava, computar a pontuação final
+    // basicamente quando vc pega um onibus e esta pontuando, se vc trocar de onibus vai contar o score
+    if(busStateRef.current.scoring && busStateRef.current.currentLine && busStateRef.current.currentLine != currentLine){
+      finishScoring("mudança de linha", routeRef.current, coords ?? undefined);
+
     }
-
+    busStateRef.current.currentLine = currentLine;
+  
     let interval: ReturnType<typeof setInterval>;
+  
     const startFetchingBuses = async () => {
-
       try {
-        // é melhor pegar os detalhes da rota 1 vez
-        // e dai ficar pegando as posições do onibus varias vezes
-        const details = await fetchBusDetails(currentLine, currentDirection);
-        if (!details) {
+        // 1) Buscar detalhes da rota no backend
+        const searchResp = await searchRoutes(currentLine);
+        const routeMatch =
+          searchResp.routes.find(
+            (r) => r.route.bus_direction === currentDirection
+          ) ?? searchResp.routes[0];
+  
+        if (!routeMatch) {
           console.error("Não foi possível obter detalhes da linha");
           return;
         }
-
-        // po bem aqui q tem q fazer o fetch das paradas de ônibus
-        // finge q eu fiz algo do tipo const collectedBusStops = await fetchBusStops(details);
-        const collectedBusStops: Coord[] = [ { latitude: 37.448548, longitude: -122.120818 },{ latitude: 37.409179, longitude: -122.067407 },];
-        setStops(collectedBusStops);
-
-        const initialPositions = await fetchBusPositions(details);
-        setBuses(initialPositions);
-
-        interval = setInterval(() => { 
-          (async () => {
-            const updatedPositions = await fetchBusPositions(details);
-            setBuses(updatedPositions);
-          })();
-        }, 1000); // podia ser mais, menos? <- isso é algo a se pensar
-
+  
+        // 2) Buscar shape da rota
+        const shapesReq: RouteShapesRequest = {
+          routes: [routeMatch.route],
+        };
+        const shapesResp = await getRouteShapes(shapesReq);
+  
+        if (shapesResp.shapes && shapesResp.shapes.length > 0) {
+          setRoute(shapesResp.shapes[0].points as Coord[]);
+        } else {
+          setRoute([]);
+        }
+  
+        // 3) Buscar posições iniciais dos ônibus
+        const posReq: BusPositionsRequest = {
+          routes: [{ route_id: routeMatch.route_id }],
+        };
+        const initialPositions = await getBusPositions(posReq);
+        setBuses(initialPositions.buses as unknown as Bus[]);
+  
+        // 4) Atualizar posições dos ônibus a cada 1 segundo
+        interval = setInterval(async () => {
+          try {
+            const updated = await getBusPositions(posReq);
+            setBuses(updated.buses as unknown as Bus[]);
+          } catch (err) {
+            console.error("Erro ao atualizar posições dos ônibus:", err);
+          }
+        }, 1000);
+  
       } catch (err) {
-        console.error("Erro ao buscar posições dos ônibus:", err);
+        console.error("Erro ao buscar rota/posições dos ônibus:", err);
       }
     };
+  
     startFetchingBuses();
+  
     return () => {
       if (interval) clearInterval(interval);
     };
+  }, [currentLine, currentDirection]);
   
-  }, [currentLine, currentDirection, shapesData]);
 
   // NOTA!! a variável booleana busState.insideBus é que informa se o cara tá dentro ou nao do bus
   // usar isso pra calcular distancia percorrida, tempo de viagem, etc etc
@@ -117,31 +223,60 @@ export default function Map() {
 
   useEffect(() => {
     let subscription: any;
-
+  
     (async () => {
       const ok = await checkPermission();
       if (!ok) {
         alert("Permissão negada");
         return;
       }
-
+  
       subscription = await watchUserLocation((newCoords) => {
         setCoords(newCoords);
+  
         const currentRoute = routeRef.current;
         const currentBuses = busesRef.current;
-
-        if (currentRoute.length > 0 && currentBuses.length > 0) {
-          const newBusState = detectBusState(busStateRef.current, newCoords, currentBuses, currentRoute);
-          busStateRef.current = newBusState;
-          setBusState(newBusState);
+        const prevBusState = busStateRef.current;
+  
+        // Se não temos rota ou ônibus, não dá pra detectar nada direito
+        if (currentRoute.length === 0 || currentBuses.length === 0) {
+          return;
         }
+  
+        // 1) Detecta o estado atual (dentro/fora, qual ônibus, etc.)
+        const detectedState = detectBusState(
+          prevBusState,
+          newCoords,
+          currentBuses,
+          currentRoute,
+        );
+  
+        // 2) Transição: estava DENTRO e agora está FORA -> saiu do ônibus
+        if (
+          prevBusState.insideBus &&
+          !detectedState.insideBus &&
+          prevBusState.scoring
+        ) {
+          // aqui você delega TUDO pra finishScoring:
+          // - computar score
+          // - chamar stopScoring
+          // - atualizar busStateRef.current
+          // - chamar setBusState
+          finishScoring("saída do ônibus", currentRoute, newCoords);
+          return;
+        }
+  
+        // 3) Caso normal: só atualiza estado com o detectedState
+        busStateRef.current = detectedState;
+        setBusState(detectedState);
       });
     })();
-
+  
     return () => {
       if (subscription) subscription.remove();
     };
   }, []);
+  
 
   // para a tela continuar centralizada quando o usuario se mover
   useEffect(() => {
@@ -174,9 +309,18 @@ export default function Map() {
       setIsCentered(true);
     }
   }
+  
 
   const router = useRouter();
 
+  function handleStartScoring() {
+    if (!coords || route.length === 0) {
+      return;
+    }
+    alert("Iniciando pontuação no ônibus!");
+    setBusState((prev) => startScoring(prev, route, coords));
+  }
+  
   return (
     <View style={styles.container}>
 
@@ -233,6 +377,15 @@ export default function Map() {
       </TouchableOpacity>
 
       <BottomSheetMenu {...{setCurrentLine}}/>
+
+      {!busState.scoring && busState.insideBus && (
+        <TouchableOpacity
+          style={[styles.absoluteButtons, styles.boardButton]}
+          onPress={handleStartScoring}
+        >
+          <Text>Entrei no ônibus</Text>
+        </TouchableOpacity>
+      )}
 
       {busState.insideBus && (
         <Text style={styles.busStatus}>Dentro do ônibus {busState.busId}</Text>
@@ -295,6 +448,21 @@ const styles = StyleSheet.create({
     top: 40,
     right: 70, 
   },
+  boardButton: {
+    top: 40,
+    left: 20,
+    backgroundColor: "#28A745",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    minWidth: 180,       // <-- garante largura sem explodir layout
+    alignItems: "center",
+    zIndex: 999,
+  }
+  
+  
+  
+    
 });
 
 const mapStyle = [

@@ -4,7 +4,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 // Lê a URL da API das variáveis de ambiente
 // Configure no arquivo .env: EXPO_PUBLIC_API_URL=http://SEU_IP:8000
 // Fallback para localhost se não estiver configurado
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://56.124.99.21:8000";
 
 class APIClient {
   private client: AxiosInstance;
