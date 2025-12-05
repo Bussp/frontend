@@ -15,7 +15,7 @@ class APIClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_URL,
-      timeout: 5000,
+      timeout: 15000, // Aumentado de 5s para 15s
     });
 
     // Adiciona JWT automaticamente
