@@ -53,7 +53,6 @@ export default function LoginScreen() {
       },
       {
         onSuccess: async () => {
-          console.log("[LOGIN] Login bem-sucedido!");
           
           // Busca os dados do usuário e atualiza o contexto
           try {
