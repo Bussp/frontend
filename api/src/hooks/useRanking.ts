@@ -54,7 +54,7 @@ export function useUserRanking(options?: { enabled?: boolean }) {
 export function useGlobalRanking(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.ranking.global(),
-    queryFn: getGlobalRanking,
+    queryFn: getGlobalRanking, 
     staleTime: 60 * 1000, // Rankings are fresh for 1 minute
     ...options,
   });
