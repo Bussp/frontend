@@ -1,5 +1,6 @@
 // api/src/client.ts
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { deleteToken, getToken, saveToken } from "./utils/secureStorage";
 
 // Lê a URL da API das variáveis de ambiente
 // Configure no arquivo .env: EXPO_PUBLIC_API_URL=http://SEU_IP:8000
@@ -9,6 +10,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
 class APIClient {
   private client: AxiosInstance;
   private token: string | null = null;
+  private isInitialized: boolean = false;
 
   constructor() {
     this.client = axios.create({
@@ -26,19 +28,42 @@ class APIClient {
     });
   }
 
+  /** Inicializa o cliente carregando o token salvo */
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+    
+    try {
+      const savedToken = await getToken();
+      if (savedToken) {
+        this.token = savedToken;
+      }
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('Erro ao inicializar APIClient:', error);
+      this.isInitialized = true;
+    }
+  }
+
   /** Salva o token depois de logar */
-  setToken(token: string) {
+  async setToken(token: string): Promise<void> {
     this.token = token;
+    await saveToken(token);
   }
 
   /** Remove o token (logout) */
-  clearToken() {
+  async clearToken(): Promise<void> {
     this.token = null;
+    await deleteToken();
   }
 
   /** Verifica se há token salvo */
   hasToken(): boolean {
     return this.token !== null;
+  }
+
+  /** Retorna o token atual */
+  getStoredToken(): string | null {
+    return this.token;
   }
 
   /** Métodos padrão */

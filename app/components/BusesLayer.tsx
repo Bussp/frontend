@@ -2,7 +2,7 @@
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import React from "react";
 import { Marker } from "react-native-maps";
-import { Bus } from "../models/buses";
+import { Bus } from "../../models/buses";
 
 type Props = {
   line: string;

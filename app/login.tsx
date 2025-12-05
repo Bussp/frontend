@@ -1,22 +1,25 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useLogin } from "../api/src/hooks/useUsers";
+import { useAuth } from "../api/src/providers/AuthProvider";
+import { getCurrentUser } from "../api/src/requests/users";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { mutate: login, isPending } = useLogin();
+  const { setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -49,9 +52,42 @@ export default function LoginScreen() {
         password: formData.password,
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           console.log("[LOGIN] Login bem-sucedido!");
-          router.replace("/");
+          
+          // Busca os dados do usuário e atualiza o contexto
+          try {
+            const userData = await getCurrentUser();
+            setUser(userData);
+            router.replace("/");
+          } catch (error: any) {
+            console.error("Erro ao buscar dados do usuário:", error);
+            
+            // Verifica se é erro de rede
+            if (error?.message?.includes("Network request failed")) {
+              Alert.alert(
+                "Erro de Conexão",
+                "Não foi possível conectar ao servidor. Verifique sua conexão com a internet e se o backend está rodando.",
+                [
+                  {
+                    text: "OK",
+                    onPress: () => router.replace("/"),
+                  },
+                ]
+              );
+            } else {
+              Alert.alert(
+                "Erro",
+                "Não foi possível carregar os dados do usuário. Tente novamente.",
+                [
+                  {
+                    text: "OK",
+                    onPress: () => router.replace("/"),
+                  },
+                ]
+              );
+            }
+          }
         },
         onError: (error: any) => {
           let errorMessage = "Email ou senha incorretos. Tente novamente.";

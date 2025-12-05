@@ -1,17 +1,17 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useRegister } from "../api/src/hooks/useUsers";
 
 export default function RegisterScreen() {
@@ -65,11 +65,11 @@ export default function RegisterScreen() {
         onSuccess: () => {
           Alert.alert(
             "Sucesso",
-            "Conta criada com sucesso!",
+            "Conta criada com sucesso! Faça login para continuar.",
             [
               {
                 text: "OK",
-                onPress: () => router.push("/"),
+                onPress: () => router.replace("/login"),
               },
             ]
           );

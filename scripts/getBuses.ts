@@ -1,9 +1,9 @@
 // scripts/getBuses.ts
 import {
-  BusPosition,
-  BusRouteResponse
-} from "../../api/src/models/routes.types";
-import { getBusPositions, searchRoutes } from "../../api/src/requests/routes";
+    BusPosition,
+    BusRouteResponse
+} from "../api/src/models/routes.types";
+import { getBusPositions, searchRoutes } from "../api/src/requests/routes";
 import { Bus } from "../models/buses";
 
 export async function fetchBusDetails(route: string, direction: number): Promise<BusRouteResponse | null> {

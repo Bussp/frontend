@@ -6,10 +6,10 @@ import MapView, { Marker } from 'react-native-maps';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { useRouteShapes } from "../../api/src/hooks/useRoutes";
-import { Bus, BusState, Coord } from "../models/buses";
-import { detectBusState } from "../scripts/busDetection";
-import { fetchBusDetails, fetchBusPositions } from "../scripts/getBuses";
-import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+import { Bus, BusState, Coord } from "../../models/buses";
+import { detectBusState } from "../../scripts/busDetection";
+import { fetchBusDetails, fetchBusPositions } from "../../scripts/getBuses";
+import { checkPermission, watchUserLocation } from "../../scripts/getLocation";
 
 import { useRouter } from "expo-router";
 import BottomSheetMenu from "./BottomSheetMenu";
@@ -228,7 +228,9 @@ export default function Map() {
         onPress={() => router.navigate('/ranking')}>
           <FontAwesome name="users" size={20} color="black"/>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.absoluteButtons, styles.profileButton]}>
+      <TouchableOpacity 
+        style={[styles.absoluteButtons, styles.profileButton]}
+        onPress={() => router.navigate('/user' as any)}>
           <FontAwesome name="user" size={20} color="black"/>
       </TouchableOpacity>
 
