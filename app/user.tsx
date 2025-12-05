@@ -2,7 +2,7 @@ import { Image, ImageSourcePropType, Text, View } from 'react-native';
 import { stylesUser } from './styles/stylesUser';
 
 import { useCurrentUser, useUserHistory } from '@/api/src';
-import { ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator, Divider, Surface } from 'react-native-paper';
 
 const icons: ImageSourcePropType[] = [
     require("@/assets/images/user_icons/1.png"),
@@ -26,17 +26,25 @@ export default function User() {
     for (const c of data?.name || []) {
         iconId += c.charCodeAt(0);
     }
-    iconId = iconId % 6 + 1;
+    iconId = iconId % 6;
 
     return (
         <View style={stylesUser.container}>
-            <View style={stylesUser.beautifulBody}>
-                {/* <View style={stylesUser.beautifulHeaderRounded} /> */}
-                {/* <View style={stylesUser.beautifulHeaderSkewed} /> */}
-                {/* <View style={stylesUser.beautifulHeaderSkewedShadow} /> */}
+            <Surface style={stylesUser.beautifulBody}>
                 <Image style={stylesUser.icon} source={icons[iconId]}></Image>
                 <Text style={stylesUser.username}>{data?.name}</Text>
-            </View>
+                
+                <Text style={{ fontSize: 20, marginTop: 30 }}>Score</Text>
+                <Divider bold style={{ width: "70%", marginTop: 8 }} />
+                <Surface style={stylesUser.scoreContainer}>
+                    <Text style={{ fontSize: 56, marginRight: 24 }}>🚍</Text>
+                    <View style={{ display: "flex", flexDirection: "column", paddingTop: 10 }}>
+                        {/* <Text style={{ fontSize: 26, fontWeight: "bold" }}>{data?.score} pontos</Text> */}
+                        <Text style={{ fontSize: 26, fontWeight: "bold" }}>6 pontos</Text>
+                        <Text>totais</Text>
+                    </View>
+                </Surface>
+            </Surface>
         </View>
     );
 }
