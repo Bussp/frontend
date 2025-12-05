@@ -18,7 +18,7 @@ export default function RankingGlobal({ users }: { users: User[] }) {
       <DataTable.Row style={styleGlobalRanking.rowHeader}>
         <DataTable.Cell textStyle={styleGlobalRanking.rowHeaderText}>Rank</DataTable.Cell>
         <DataTable.Cell textStyle={styleGlobalRanking.rowHeaderText}>Nome</DataTable.Cell>
-        <DataTable.Cell numeric textStyle={styleGlobalRanking.rowHeaderText}>Pontos</DataTable.Cell>
+        <DataTable.Cell numeric textStyle={styleGlobalRanking.rowHeaderText}>gCO2/km</DataTable.Cell>
       </DataTable.Row>
 
       {users.map((item, index) => (
