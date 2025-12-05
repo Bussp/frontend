@@ -4,8 +4,8 @@ import BottomSheet, { BottomSheetTextInput, BottomSheetView } from "@gorhom/bott
 import React, { useMemo, useRef, useState } from "react";
 import { Keyboard, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from 'react-native-gesture-handler';
-import { busLine } from '../models/buses';
-import { buscarLinha } from '../scripts/apiSPTrans';
+import { busLine } from '../../models/buses';
+import { buscarLinha } from '../../scripts/apiSPTrans';
 
 interface BottomSheetProps {
     setCurrentLine: (value: string | null) => void;

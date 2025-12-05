@@ -1,5 +1,5 @@
-import { Image, ImageSourcePropType, Text, View } from 'react-native';
-import { stylesUser } from './styles/stylesUser';
+import { stylesUser } from '@/styles/stylesUser';
+import { Alert, Image, ImageSourcePropType, Text, View } from 'react-native';
 
 import { HistoryResponse, type TripHistoryEntry, useCurrentUser, useLogout, type User, useUserHistory } from '@/api/src';
 import { useRouter } from 'expo-router';
@@ -56,20 +56,39 @@ const UserHistory = ({ histData }: { histData: HistoryResponse | undefined }) =>
 </>;
 
 export default function Profile() {
-    const { data, isLoading, isError, error } = useCurrentUser({ enabled: true });
+    const { data, isLoading } = useCurrentUser({ enabled: true });
     const { data: histData } = useUserHistory();
     const { mutate: logout } = useLogout();
-
     const router = useRouter();
-    const handleLogout = () => {
-        console.log("Logging out");
-        logout(undefined, {
-            onSuccess: () => router.navigate('/'),
-        });
-    };
 
-    if (isLoading) return <ActivityIndicator />;
-    if (isError) return <Text> {error.message} </Text>;
+    const handleLogout = () => {
+        Alert.alert(
+          "Logout",
+          "Tem certeza que deseja sair?",
+          [
+            {
+              text: "Cancelar",
+              style: "cancel",
+            },
+            {
+              text: "Sair",
+              style: "destructive",
+              onPress: async () => {
+                await logout();
+                router.replace("/login");
+              },
+            },
+          ]
+        );
+      };
+
+    if (isLoading) {
+        return (
+            <View style={stylesUser.container}>
+                <ActivityIndicator size="large" color="#0D8694" />
+            </View>
+        );
+    }
 
     let iconId = 0;
     for (const c of data?.name || []) {

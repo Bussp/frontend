@@ -1,6 +1,6 @@
+import { stylesRanking } from '@/styles/stylesRanking';
 import { View } from 'react-native';
 import RankingGlobal from "./components/globalRanking";
-import { stylesRanking } from './styles/stylesRanking';
 
 import { GlobalRankResponse } from '@/api/src/models/ranking.types';
 import { useState } from 'react';
