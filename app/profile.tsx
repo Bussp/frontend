@@ -2,6 +2,7 @@ import { stylesUser } from '@/styles/stylesUser';
 import { Alert, Image, ImageSourcePropType, Text, View } from 'react-native';
 
 import { HistoryResponse, type TripHistoryEntry, useCurrentUser, useLogout, type User, useUserHistory } from '@/api/src';
+import { useAuth } from '@/api/src/providers/AuthProvider';
 import { useRouter } from 'expo-router';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ActivityIndicator, Button, DataTable, Divider, Surface } from 'react-native-paper';
@@ -58,7 +59,8 @@ const UserHistory = ({ histData }: { histData: HistoryResponse | undefined }) =>
 export default function Profile() {
     const { data, isLoading } = useCurrentUser({ enabled: true });
     const { data: histData } = useUserHistory();
-    const { mutate: logout } = useLogout();
+    const { mutate: logoutMutation } = useLogout();
+    const { logout: authLogout } = useAuth();
     const router = useRouter();
 
     const handleLogout = () => {
@@ -74,8 +76,11 @@ export default function Profile() {
               text: "Sair",
               style: "destructive",
               onPress: async () => {
-                await logout();
-                router.replace("/login");
+                // Clear auth state first
+                await authLogout();
+                // Clear React Query cache
+                logoutMutation();
+                // Navigation will be handled by _layout.tsx auth guard
               },
             },
           ]
