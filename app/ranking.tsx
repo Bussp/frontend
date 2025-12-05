@@ -6,6 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import RankingGlobal from "./components/ranking/globalRanking";
 import RankingLocal from './components/ranking/localRanking';
 
+function LoadingRanking() {
+    return (
+        <DataTable style={stylesRanking.container}>
+            <DataTable.Header>
+                <DataTable.Title>{null}</DataTable.Title>
+                <DataTable.Title>Carregando...</DataTable.Title>
+                <DataTable.Title>{null}</DataTable.Title>
+            </DataTable.Header>
+        </DataTable>
+    );
+}
+
 export default function Ranking() {
 
     const { 
