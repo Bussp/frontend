@@ -71,6 +71,7 @@ export default function Map() {
     reason: string,
     routeForScore?: Coord[],
     userPosition?: Coord,
+    currentLine?: string,
   ) {
     if (!busStateRef.current.scoring) {
       return;
@@ -141,7 +142,7 @@ export default function Map() {
     if (!currentLine) {
       // se vc desmarcou a linha conta o score
       if(busStateRef.current.scoring){
-        finishScoring("linha desmarcada", routeRef.current, coords ?? undefined);
+        finishScoring("linha desmarcada", routeRef.current, coords ?? undefined, busStateRef.current.currentLine ?? undefined);
 
       }
       setBuses([]);
@@ -152,7 +153,7 @@ export default function Map() {
     // se currentline mudou enquanto pontuava, computar a pontuação final
     // basicamente quando vc pega um onibus e esta pontuando, se vc trocar de onibus vai contar o score
     if(busStateRef.current.scoring && busStateRef.current.currentLine && busStateRef.current.currentLine != currentLine){
-      finishScoring("mudança de linha", routeRef.current, coords ?? undefined);
+      finishScoring("mudança de linha", routeRef.current, coords ?? undefined, busStateRef.current.currentLine ?? undefined);
 
     }
     busStateRef.current.currentLine = currentLine;
@@ -190,13 +191,32 @@ export default function Map() {
           routes: [{ route_id: routeMatch.route_id }],
         };
         const initialPositions = await getBusPositions(posReq);
-        setBuses(initialPositions.buses as unknown as Bus[]);
+        setBuses(
+          initialPositions.buses.map((b, index) => ({
+            // id único: linha + sentido + índice + posição
+            id: `${routeMatch.route.bus_line}-${routeMatch.route.bus_direction}-${index}-${b.position.latitude}-${b.position.longitude}`,
+            type: routeMatch.route.bus_direction,
+            position: {
+              latitude: b.position.latitude,
+              longitude: b.position.longitude,
+            },
+          }))
+        );
   
         // 4) Atualizar posições dos ônibus a cada 1 segundo
         interval = setInterval(async () => {
           try {
             const updated = await getBusPositions(posReq);
-            setBuses(updated.buses as unknown as Bus[]);
+            setBuses(
+              updated.buses.map((b, index) => ({
+                id: `${routeMatch.route.bus_line}-${routeMatch.route.bus_direction}-${index}-${b.position.latitude}-${b.position.longitude}`,
+                type: routeMatch.route.bus_direction,
+                position: {
+                  latitude: b.position.latitude,
+                  longitude: b.position.longitude,
+                },
+              }))
+            );
           } catch (err) {
             console.error("Erro ao atualizar posições dos ônibus:", err);
           }
@@ -262,7 +282,7 @@ export default function Map() {
           // - chamar stopScoring
           // - atualizar busStateRef.current
           // - chamar setBusState
-          finishScoring("saída do ônibus", currentRoute, newCoords);
+          finishScoring("saída do ônibus", currentRoute, newCoords, prevBusState.currentLine ?? undefined);
           return;
         }
   
