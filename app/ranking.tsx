@@ -1,10 +1,9 @@
-import { View, Text } from 'react-native';
-import { stylesRanking } from './styles/stylesRanking';
+import { View } from 'react-native';
 import RankingGlobal from "./components/globalRanking";
+import { stylesRanking } from './styles/stylesRanking';
 
-import { getGlobalRank } from '@/api/src/ranking';
-import { useEffect, useState } from 'react';
 import { GlobalRankResponse } from '@/api/src/models/ranking.types';
+import { useState } from 'react';
 
 const test : GlobalRankResponse[] = [
     {

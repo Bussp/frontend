@@ -1,53 +1,42 @@
-import { View, Text } from 'react-native';
-import { stylesRanking } from './styles/stylesRanking';
-import RankingGlobal from "./components/globalRanking";
+import { Image, ImageSourcePropType, Text, View } from 'react-native';
+import { stylesUser } from './styles/stylesUser';
 
-import { getGlobalRank } from '@/api/src/ranking';
-import { useEffect, useState } from 'react';
-import { GlobalRankResponse } from '@/api/src/models/ranking.types';
+import { useCurrentUser, useUserHistory } from '@/api/src';
+import { ActivityIndicator } from 'react-native-paper';
 
-const test : GlobalRankResponse[] = [
-    {
-        name: "Ana",
-        email: "ana@usp.br",
-        score: 310,
-    },
-    {
-        name: "Luiza",
-        email: "luiza@usp.br",
-        score: 290,
-    },
-    {
-        name: "Clara",
-        email: "clara@usp.br",
-        score: 100,
-    },
-]
+const icons: ImageSourcePropType[] = [
+    require("@/assets/images/user_icons/1.png"),
+    require("@/assets/images/user_icons/2.png"),
+    require("@/assets/images/user_icons/3.png"),
+    require("@/assets/images/user_icons/4.png"),
+    require("@/assets/images/user_icons/5.png"),
+    require("@/assets/images/user_icons/6.png"),
+];
 
-export default function Ranking() {
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState<GlobalRankResponse[]>([]);
-    const [err, setErr] = useState<string | null>(null);
+export default function User() {
+    const { data, isLoading, isError, error } = useCurrentUser({ enabled: true });
+    const { data: histData } = useUserHistory();
+    console.log(data);
+    console.log(histData);
 
-    {/*
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try{
-                const {data : response} = getGlobalRank();
-                setData(response);
-            }
-            catch (err) {
-                console.error(err.message);
-            }
-        }
-        fetchData();
-    }, []);
-    */}
+    if (isLoading) return <ActivityIndicator />;
+    if (isError) return <Text> {error.message} </Text>;
+
+    let iconId = 0;
+    for (const c of data?.name || []) {
+        iconId += c.charCodeAt(0);
+    }
+    iconId = iconId % 6 + 1;
 
     return (
-        <View style={stylesRanking.container}>
-            <RankingGlobal DataArray={test}></RankingGlobal>
+        <View style={stylesUser.container}>
+            <View style={stylesUser.beautifulBody}>
+                {/* <View style={stylesUser.beautifulHeaderRounded} /> */}
+                {/* <View style={stylesUser.beautifulHeaderSkewed} /> */}
+                {/* <View style={stylesUser.beautifulHeaderSkewedShadow} /> */}
+                <Image style={stylesUser.icon} source={icons[iconId]}></Image>
+                <Text style={stylesUser.username}>{data?.name}</Text>
+            </View>
         </View>
     );
 }
