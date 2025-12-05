@@ -4,7 +4,11 @@ export interface Coord {
 }
 
 export interface BusState {
+  currentLine: string | null;
   insideBus: boolean;
+  scoring: boolean;
+  entryPosition:Coord | null;
+
   busId: string | null;
   lastBusPosition: Coord | null;
   lastUserPosition: Coord | null;
@@ -70,7 +74,11 @@ export function detectBusState(state: BusState, user: Coord, buses: Bus[], route
 
   const inside = (newCloseCount >= 0.4*N);
   return {
+    currentLine: state.currentLine,
     insideBus: inside,
+    scoring: state.scoring,
+    entryPosition: state.entryPosition,
+
     busId: inside ? (nearestBus?.id ?? state.busId) : null,
     lastBusPosition: busNow,
     lastUserPosition: user,
@@ -79,5 +87,90 @@ export function detectBusState(state: BusState, user: Coord, buses: Bus[], route
     distHistory: newHistory,
     distIndex: nextIndex,
     closeCount: newCloseCount,
+  };
+}
+
+
+export function startScoring(state: BusState, shape: Coord[], user: Coord): BusState {
+  if (!user || shape.length === 0) {
+    return state;
+  }
+
+  // Encontra o ponto do shape mais próximo do usuário
+  let nearestPoint = shape[0];
+  let minDist = dist(user, nearestPoint);
+
+  for (let i = 1; i < shape.length; i++) {
+    const point = shape[i];
+    const d = dist(user, point);
+    if (d < minDist) {
+      minDist = d;
+      nearestPoint = point;
+    }
+  }
+
+  return {
+    ...state,
+    scoring: true,
+    entryPosition: nearestPoint,  // nome novo
+  };
+}
+
+
+export function computeScore(
+  state: BusState,
+  shape: Coord[],
+  user: Coord
+): number {
+  // Sem shape ou sem entryPosition não tem como calcular
+  if (!state.entryPosition || shape.length < 2) {
+    return 0;
+  }
+
+  // Helper: encontra o índice do ponto mais próximo de um alvo no shape
+  const findNearestIndex = (target: Coord, points: Coord[]): number => {
+    let nearestIndex = 0;
+    let minDist = dist(target, points[0]);
+
+    for (let i = 1; i < points.length; i++) {
+      const d = dist(target, points[i]);
+      if (d < minDist) {
+        minDist = d;
+        nearestIndex = i;
+      }
+    }
+
+    return nearestIndex;
+  };
+
+  // Índice do ponto de entrada (onde começou a contagem)
+  const entryIndex = findNearestIndex(state.entryPosition, shape);
+  // Índice do ponto de saída (ponto mais próximo do usuário ao sair)
+  const exitIndex = findNearestIndex(user, shape);
+
+  // Se, por algum motivo, forem o mesmo ponto, distância ~ 0
+  if (entryIndex === exitIndex) {
+    return 0;
+  }
+
+  // Queremos percorrer o shape entre esses dois índices
+  const start = Math.min(entryIndex, exitIndex);
+  const end = Math.max(entryIndex, exitIndex);
+
+  let totalDistance = 0;
+
+  for (let i = start; i < end; i++) {
+    totalDistance += dist(shape[i], shape[i + 1]);
+  }
+
+  // totalDistance está em metros (porque dist usa meterPerDeg)
+  return totalDistance;
+}
+
+export function stopScoring(state: BusState): BusState {
+  return {
+    ...state,
+    scoring: false,
+    entryPosition: null,
   };
 }

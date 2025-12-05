@@ -10,7 +10,11 @@ export interface Bus {
 };
 
 export interface BusState {
+  currentLine: string | null;
   insideBus: boolean;
+  scoring: boolean;
+  entryPosition:Coord | null;
+
   busId: string | null;
   lastBusPosition: Coord | null;
   lastUserPosition: Coord | null;
