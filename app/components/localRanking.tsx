@@ -1,6 +1,6 @@
+import { RankUserResponse } from '@/api/src/models/ranking.types';
 import { DataTable } from 'react-native-paper';
-import { styleGlobalRanking } from "../styles/stylesRanking";
-import { GlobalRankResponse, RankUserRequest, RankUserResponse } from '@/api/src/models/ranking.types';
+import { styleGlobalRanking } from "../../styles/stylesRanking";
 
 export default function RankingLocal({ Data } : {Data : RankUserResponse}) {
     return (

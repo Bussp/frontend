@@ -2,8 +2,8 @@
 import {
   BusPosition,
   BusRouteResponse
-} from "../../api/src/models/routes.types";
-import { getBusPositions, searchRoutes } from "../../api/src/requests/routes";
+} from "../api/src/models/routes.types";
+import { getBusPositions, searchRoutes } from "../api/src/requests/routes";
 import { Bus } from "../models/buses";
 
 export async function fetchBusDetails(route: string, direction: number): Promise<BusRouteResponse | null> {
@@ -42,8 +42,11 @@ export async function fetchBusPositions(routeDetails: BusRouteResponse): Promise
         longitude: b.position.longitude,
       },
     }));
-  } catch (err) {
-    console.error("Erro ao buscar posições dos ônibus:", err);
+  } catch (err: any) {
+    // Só loga o erro se não for timeout (para evitar spam no console)
+    if (!err?.message?.includes('timeout')) {
+      console.error("Erro ao buscar posições dos ônibus:", err);
+    }
     return [];
   }
 }

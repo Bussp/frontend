@@ -1,6 +1,6 @@
-import { DataTable } from 'react-native-paper';
-import { styleGlobalRanking } from "../styles/stylesRanking";
 import { GlobalRankResponse } from '@/api/src/models/ranking.types';
+import { DataTable } from 'react-native-paper';
+import { styleGlobalRanking } from "../../styles/stylesRanking";
 
 export default function RankingGlobal({ DataArray }: { DataArray: GlobalRankResponse[] }) {
     return (

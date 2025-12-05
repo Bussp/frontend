@@ -9,9 +9,9 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouteShapes } from "../../api/src/hooks/useRoutes";
 import { BusPositionsRequest, RouteShapesRequest } from "../../api/src/models/routes.types";
 import { getBusPositions, getRouteShapes, searchRoutes } from "../../api/src/requests/routes";
-import { Bus, BusState, Coord } from "../models/buses";
-import { computeScore, detectBusState, startScoring, stopScoring } from "../scripts/busDetection";
-import { checkPermission, watchUserLocation } from "../scripts/getLocation";
+import { Bus, BusState, Coord } from "../../models/buses";
+import { computeScore, detectBusState, startScoring, stopScoring } from "../../scripts/busDetection";
+import { checkPermission, watchUserLocation } from "../../scripts/getLocation";
 
 import type { CreateTripRequest } from "../../api/src/models/trips.types";
 import { createTrip } from "../../api/src/requests/trips";
@@ -392,7 +392,9 @@ export default function Map() {
         onPress={() => router.navigate('/ranking')}>
           <FontAwesome name="users" size={20} color="black"/>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.absoluteButtons, styles.profileButton]}>
+      <TouchableOpacity 
+        style={[styles.absoluteButtons, styles.profileButton]}
+        onPress={() => router.navigate('/profile')}>
           <FontAwesome name="user" size={20} color="black"/>
       </TouchableOpacity>
 
