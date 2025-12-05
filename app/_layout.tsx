@@ -37,6 +37,18 @@ export default function RootLayout() {
               },
               headerTitleAlign: "center"
             }}/>
+          <Stack.Screen 
+            name="login"
+            options={{ 
+              title : "Login",
+              headerShown: false,
+            }}/>
+          <Stack.Screen 
+            name="register"
+            options={{ 
+              title : "Registrar",
+              headerShown: false,
+            }}/>
       </Stack>
     </QueryProvider>
   );

@@ -36,6 +36,11 @@ class APIClient {
     this.token = null;
   }
 
+  /** Verifica se há token salvo */
+  hasToken(): boolean {
+    return this.token !== null;
+  }
+
   /** Métodos padrão */
   async get<T>(url: string, config?: AxiosRequestConfig) {
     const response = await this.client.get<T>(url, config);
