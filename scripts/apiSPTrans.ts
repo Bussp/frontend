@@ -1,4 +1,4 @@
-import { busLine } from "../interfaces/busLine";
+import { busLine } from "../models/buses";
 
 const apiBaseUrl = "https://api.olhovivo.sptrans.com.br/v2.1";
 

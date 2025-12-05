@@ -1,8 +1,8 @@
 import { apiClient } from "../client";
 import type {
-  TokenResponse,
-  User,
-  UserCreateAccountRequest,
+    TokenResponse,
+    User,
+    UserCreateAccountRequest,
 } from "../models/users.types";
 
 /**
@@ -36,8 +36,8 @@ export async function loginUser(
     },
   });
 
-  // Store the token for subsequent requests
-  apiClient.setToken(response.access_token);
+  // Store the token for subsequent requests (now persists across sessions)
+  await apiClient.setToken(response.access_token);
 
   return response;
 }
@@ -53,6 +53,6 @@ export async function getCurrentUser(): Promise<User> {
 /**
  * Clears the authentication token (logout).
  */
-export function logoutUser(): void {
-  apiClient.clearToken();
+export async function logoutUser(): Promise<void> {
+  await apiClient.clearToken();
 }

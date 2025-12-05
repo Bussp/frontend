@@ -2,7 +2,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React from "react";
 import { Marker } from "react-native-maps";
-import { Coord } from '../models/buses';
+import { Coord } from '../../models/buses';
 
 type Props = {
   stops: Coord[];
