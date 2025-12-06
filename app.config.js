@@ -10,6 +10,10 @@ module.exports = {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
+      infoPlist: {
+        NSLocationWhenInUseUsageDescription: "Este app precisa acessar sua localização para mostrar sua posição no mapa e detectar quando você está em um ônibus.",
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Este app precisa acessar sua localização continuamente para rastrear viagens de ônibus e calcular pontuações.",
+      },
     },
     android: {
       adaptiveIcon: {
@@ -21,9 +25,15 @@ module.exports = {
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       package: "com.anonymous.frontend",
+      permissions: [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
       config: {
         googleMaps: {
-          apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+          apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyD3aIE4pxuV7cmWFp3YBQVfoq-qUuv_9d4",
         },
       },
     },
