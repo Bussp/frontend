@@ -1,0 +1,36 @@
+[33m5aa2c2e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: reset: moving to origin/main
+[33m466a563[m HEAD@{1}: reset: moving to HEAD
+[33m466a563[m HEAD@{2}: pull origin main: Merge made by the 'ort' strategy.
+[33ma32f790[m[33m ([m[1;31morigin/fix/tela_ranking[m[33m, [m[1;32mfix/tela_ranking[m[33m)[m HEAD@{3}: checkout: moving from fix/tela_ranking to main
+[33ma32f790[m[33m ([m[1;31morigin/fix/tela_ranking[m[33m, [m[1;32mfix/tela_ranking[m[33m)[m HEAD@{4}: checkout: moving from main to fix/tela_ranking
+[33ma32f790[m[33m ([m[1;31morigin/fix/tela_ranking[m[33m, [m[1;32mfix/tela_ranking[m[33m)[m HEAD@{5}: commit: fix: tela de rank no iphone
+[33m8701f8d[m HEAD@{6}: pull origin main: Merge made by the 'ort' strategy.
+[33m1eb38a7[m[33m ([m[1;31morigin/fix/obter_bus_position[m[33m)[m HEAD@{7}: checkout: moving from fix/obter_bus_position to main
+[33mb086880[m[33m ([m[1;32mfix/obter_bus_position[m[33m)[m HEAD@{8}: pull origin main: Merge made by the 'ort' strategy.
+[33m1eb38a7[m[33m ([m[1;31morigin/fix/obter_bus_position[m[33m)[m HEAD@{9}: checkout: moving from main to fix/obter_bus_position
+[33m1eb38a7[m[33m ([m[1;31morigin/fix/obter_bus_position[m[33m)[m HEAD@{10}: commit: fix: corrige erro 401 ao deslogar e continuar pedindo posicoes de onibus e erros de timeout
+[33m6332ad5[m HEAD@{11}: pull origin main: Merge made by the 'ort' strategy.
+[33ma8efc4c[m HEAD@{12}: pull origin main -X theirs: Merge made by the 'ort' strategy.
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{13}: reset: moving to HEAD
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{14}: checkout: moving from feat/login_cadastro to main
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{15}: checkout: moving from main to feat/login_cadastro
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{16}: checkout: moving from feat/login_cadastro to main
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{17}: checkout: moving from main to feat/login_cadastro
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{18}: checkout: moving from feat/login_cadastro_ to main
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{19}: checkout: moving from main to feat/login_cadastro_
+[33m59a8d05[m[33m ([m[1;31morigin/feat/login_cadastro[m[33m, [m[1;32mfeat/login_cadastro_[m[33m, [m[1;32mfeat/login_cadastro[m[33m)[m HEAD@{20}: commit: tira mensagem de log que nao eh mais util
+[33m93ed848[m HEAD@{21}: commit: corrige warnings do expo
+[33m09f06e2[m HEAD@{22}: commit: tela de usuario minimal com botao de logout
+[33me0bbd07[m HEAD@{23}: commit: modifiquei o client.ts para um timeout maior e o map.tsx pra ter um intervalo de busca maior
+[33ma36d80e[m HEAD@{24}: commit: modifica estrutura do /app retirando o models, mocks, scripts, styles e test-date. Alem disso, adiciona persistencia ao token usando expo-secure-store
+[33md126e0b[m HEAD@{25}: commit: adiciona telas de login e cadastro básicas
+[33m3b11e6b[m HEAD@{26}: commit (merge): resolvendo problema de merge
+[33mc9e82d7[m HEAD@{27}: checkout: moving from feat/login_cadastro to main
+[33me5f3895[m[33m ([m[1;31morigin/protege_seu_IP[m[33m, [m[1;32mprotege_seu_IP[m[33m)[m HEAD@{28}: checkout: moving from main to feat/login_cadastro
+[33mc9e82d7[m HEAD@{29}: checkout: moving from feat/login_cadastro to main
+[33me5f3895[m[33m ([m[1;31morigin/protege_seu_IP[m[33m, [m[1;32mprotege_seu_IP[m[33m)[m HEAD@{30}: checkout: moving from protege_seu_IP to feat/login_cadastro
+[33me5f3895[m[33m ([m[1;31morigin/protege_seu_IP[m[33m, [m[1;32mprotege_seu_IP[m[33m)[m HEAD@{31}: commit: atualiza tbm o frontend/app/api/client.ts
+[33mc9e82d7[m HEAD@{32}: checkout: moving from main to protege_seu_IP
+[33mc9e82d7[m HEAD@{33}: commit: modifica client.ts para nao expor seu IP e adiciona .env e .env.example para isso
+[33m6de8d90[m HEAD@{34}: pull origin main: Fast-forward
+[33m193ab1a[m HEAD@{35}: clone: from github.com-ssh-cgnopapo:Bussp/frontend.git

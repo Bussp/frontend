@@ -429,10 +429,6 @@ export default function Map() {
         </TouchableOpacity>
       )}
 
-      {busState.insideBus && (
-        <Text style={styles.busStatus}>Dentro do ônibus {busState.busId}</Text>
-      )}
-
     </View>
   );
 }
@@ -455,16 +451,6 @@ const styles = StyleSheet.create({
   recenterText: {
     color: "#000",
     fontWeight: "bold",
-  },
-  busStatus: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    backgroundColor: '#38761D',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    elevation: 4,
   },
   absoluteButtons: {
     position: "absolute",
