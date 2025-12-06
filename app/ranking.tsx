@@ -1,52 +1,65 @@
+import { useCurrentUser, useGlobalRanking, useUserRanking } from '@/api/src';
 import { stylesRanking } from '@/styles/stylesRanking';
-import { View } from 'react-native';
-import RankingGlobal from "./components/globalRanking";
-
-import { GlobalRankResponse } from '@/api/src/models/ranking.types';
-import { useState } from 'react';
-
-const test : GlobalRankResponse[] = [
-    {
-        name: "Ana",
-        email: "ana@usp.br",
-        score: 310,
-    },
-    {
-        name: "Luiza",
-        email: "luiza@usp.br",
-        score: 290,
-    },
-    {
-        name: "Clara",
-        email: "clara@usp.br",
-        score: 100,
-    },
-]
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { ActivityIndicator, DataTable } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import RankingGlobal from "./components/ranking/globalRanking";
+import RankingLocal from './components/ranking/localRanking';
 
 export default function Ranking() {
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState<GlobalRankResponse[]>([]);
-    const [err, setErr] = useState<string | null>(null);
 
-    {/*
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try{
-                const {data : response} = getGlobalRank();
-                setData(response);
-            }
-            catch (err) {
-                console.error(err.message);
-            }
-        }
-        fetchData();
-    }, []);
-    */}
+    const { 
+        data : rankingData, 
+        isLoading :rankingIsLoading,
+        error : rankingError,
+        isError : rankingIsError,
+        status : rankingStatus,
+    } = useUserRanking();
+    const { 
+        data : userData, 
+        isLoading : userIsLoading } = useCurrentUser();
+    const { 
+        data : globalData, 
+        isLoading : globalIsLoading, 
+        refetch,
+        error,
+        isError,
+        status
+    } = useGlobalRanking();
+
+    if ( rankingIsLoading || userIsLoading || globalIsLoading ) {
+        return(
+            <View 
+                style={
+                    stylesRanking.loading
+                }>
+                <ActivityIndicator size='large' color='#0D8694'></ActivityIndicator>
+            </View>
+        ) 
+    }
 
     return (
-        <View style={stylesRanking.container}>
-            <RankingGlobal DataArray={test}></RankingGlobal>
-        </View>
+        <SafeAreaView style={{
+            flex: 1,
+            backgroundColor : "#fff",
+
+        }}>
+            <ScrollView
+                contentContainerStyle={stylesRanking.container}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={globalIsLoading}
+                        onRefresh={refetch}
+                    />
+                }>
+                <RankingLocal 
+                    userData={userData} 
+                    rankingData={rankingData} 
+                    isLoading={userIsLoading}></RankingLocal>
+                <RankingGlobal 
+                    data={globalData} 
+                    indexCurrent={rankingData?.position}></RankingGlobal>
+            </ScrollView>
+        </SafeAreaView>
     );
 }

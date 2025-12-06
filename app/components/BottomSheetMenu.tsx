@@ -11,6 +11,7 @@ interface BottomSheetProps {
     setCurrentLine: (value: string | null) => void;
     setCurrentDirection: (value: number) => void;
     setIsCurrentLineCircular: (value: boolean) => void;
+    onSheetChange?: (isExpanded: boolean) => void;
 }
 
 export type LineItem = {
@@ -20,7 +21,7 @@ export type LineItem = {
     direction: number;
 }
 
-const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrentDirection, setIsCurrentLineCircular}) => {
+const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrentDirection, setIsCurrentLineCircular, onSheetChange}) => {
     const sheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['13%', '80%'], []);
     const [lineSearch, setLineSearch] = useState("");
@@ -87,6 +88,9 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrent
             keyboardBlurBehavior='restore'
             enableDynamicSizing={false}
             android_keyboardInputMode='adjustPan'
+            onChange={(index) => {
+                onSheetChange?.(index === 1);
+            }}
         >
             <BottomSheetView>
                 <View style={styles.containerSearch}>

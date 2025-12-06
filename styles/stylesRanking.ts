@@ -1,16 +1,39 @@
 import { StyleSheet } from "react-native"
 
+export const styleScroll = StyleSheet.create({
+    container : {
+        justifyContent: "flex-start",
+        paddingTop: 0,
+        alignItems: "center",
+    }
+})
+
 export const stylesRanking = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
+        paddingTop: 0,
         backgroundColor: "#fff",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
+        gap: 15,
+        marginTop : 10,
+        marginBottom : 10,
+        paddingBottom: 20,
     },
     title: {
         color: "#fff",
         fontSize: 24,
         fontWeight: "bold"
+    },
+    loading: {
+        flex : 1,
+        borderRadius: 6,
+        backgroundColor: "#fff",
+        color: "#000",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        width: "95%",
     }
 })
 
@@ -39,10 +62,37 @@ export const styleGlobalRanking = StyleSheet.create({
     rowText : {
         fontFamily: "Comics Sans"
     },
+    rowTextMine : {
+        color: "#0D8694",
+    },
     rowHeader : {
         borderBottomWidth: 0,
     },
     rowHeaderText : {
         fontWeight: "bold",
     }
+})
+
+export const styleLocalRanking = StyleSheet.create({
+    container: {
+        borderRadius: 6,
+        color: "#000",
+        justifyContent: "center",
+        flexDirection: "column",
+        width: "95%",
+    },
+    rowHeader : {
+        borderRadius: 6,
+        backgroundColor: "#EDB137"
+    },
+    rowHeaderText : {
+        fontWeight: "bold",
+    },
+    row: {
+        borderBottomWidth: 0,
+    },
+    rowText : {
+        fontFamily: "Comics Sans",
+        color: "#0D8694",
+    },
 })

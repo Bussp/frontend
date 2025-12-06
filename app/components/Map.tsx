@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import 'react-native-gesture-handler';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
@@ -27,7 +27,9 @@ export default function Map() {
   
   const [coords, setCoords] = useState<Coord | null>(null);
   const [isCentered, setIsCentered] = useState(true);
+  const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
+  const useGoogleMaps = process.env.EXPO_PUBLIC_PARA_BUILD_APK === 'true';
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [currentDirection, setCurrentDirection] = useState<number>(1);
@@ -464,6 +466,7 @@ export default function Map() {
 
       <MapView
         ref={mapRef}
+        provider={useGoogleMaps ? PROVIDER_GOOGLE : undefined}
         style={styles.map}
         initialRegion={{
           latitude: coords.latitude,
@@ -498,12 +501,16 @@ export default function Map() {
         {currentLine!==null && <BusesLayer line={currentLine} buses={buses} />}
       </MapView>
 
-      {!isCentered && (
-        <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
-          <Text 
-            style={styles.recenterText}>Centralizar</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity 
+        style={[
+          styles.recenterButton,
+          isCentered && styles.hidden
+        ]} 
+        onPress={recenter}
+        disabled={isCentered}
+      >
+        <FontAwesome name="crosshairs" size={20} color="black"/>
+      </TouchableOpacity>
 
       <TouchableOpacity 
         style={[styles.absoluteButtons, styles.communityButton]}
@@ -516,20 +523,31 @@ export default function Map() {
           <FontAwesome name="user" size={20} color="black"/>
       </TouchableOpacity>
 
-      <BottomSheetMenu {...{setCurrentLine, setCurrentDirection, setIsCurrentLineCircular}}/>
+      <BottomSheetMenu 
+        setCurrentLine={setCurrentLine}
+        setCurrentDirection={setCurrentDirection}
+        setIsCurrentLineCircular={setIsCurrentLineCircular}
+        onSheetChange={setIsBottomSheetExpanded}
+      />
 
-      {!busState.scoring && busState.insideBus && (
-        <TouchableOpacity
-          style={[styles.absoluteButtons, styles.boardButton]}
-          onPress={handleStartScoring}
-        >
-          <Text>Entrei no ônibus</Text>
-        </TouchableOpacity>
-      )}
-
-      {busState.insideBus && (
-        <Text style={styles.busStatus}>Dentro do ônibus {busState.busId}</Text>
-      )}
+      <TouchableOpacity
+        style={[
+          styles.absoluteButtons, 
+          styles.boardButton,
+          !busState.insideBus && styles.boardButtonDisabled,
+          busState.scoring && styles.boardButtonScoring,
+        ]}
+        onPress={handleStartScoring}
+        disabled={!busState.insideBus || busState.scoring}
+      >
+        <Text style={styles.boardButtonText}>
+          {busState.scoring 
+            ? "Pontuando..."
+            : busState.insideBus 
+              ? "Entrei no ônibus" 
+              : "Fora do raio"}
+        </Text>
+      </TouchableOpacity>
 
     </View>
   );
@@ -554,16 +572,6 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: "bold",
   },
-  busStatus: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    backgroundColor: '#38761D',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    elevation: 4,
-  },
   absoluteButtons: {
     position: "absolute",
     backgroundColor: "white",
@@ -577,8 +585,21 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   recenterButton: {
-    top: 40,
+    position: "absolute",
+    top: 95,
     right: 20,
+    backgroundColor: "white",
+    width: 45,
+    height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 25,
+    elevation: 4,
+  },
+  hidden: {
+    opacity: 0,
   },
   profileButton: {
     top: 40,
@@ -595,9 +616,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 25,
-    minWidth: 180,       // <-- garante largura sem explodir layout
+    minWidth: 180,
     alignItems: "center",
     zIndex: 999,
+  },
+  boardButtonDisabled: {
+    backgroundColor: "#9E9E9E",
+    opacity: 0.6,
+  },
+  boardButtonScoring: {
+    backgroundColor: "#FF9800",
+  },
+  boardButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 14,
   }
   
   
