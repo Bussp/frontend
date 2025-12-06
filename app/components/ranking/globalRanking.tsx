@@ -1,6 +1,5 @@
 import { DataTable } from 'react-native-paper';
 import { styleGlobalRanking } from '@/styles/stylesRanking';
-import { FlatList } from 'react-native';
 import HeaderRanking from './headerRanking';
 import { GlobalRankingResponse, User } from '@/api/src';
 
@@ -25,14 +24,14 @@ export default function RankingGlobal({ data, indexCurrent } : RankingGlobalProp
         
             <HeaderRanking styleRanking={styleGlobalRanking}></HeaderRanking>
 
-            {data?.users && data.users.length > 0 && (
-                data.users.slice(0, 15).map((item : User, index : number) => (
-                    <ItemGlobalRanking
+            {data?.users && data.users.length > 0 && indexCurrent && (
+                data.users.slice(0, 10).map((item : User, index : number) => (
+                    item.score > 0 && (<ItemGlobalRanking
                         key={index + 1}
                         index={index + 1}
                         item={item}
                         indexCurrent={indexCurrent}
-                    ></ItemGlobalRanking>
+                    ></ItemGlobalRanking>)
                 ))
             )}
         </DataTable>
