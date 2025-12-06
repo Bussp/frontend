@@ -57,7 +57,7 @@ function RootLayoutNav() {
             headerTitleAlign: "center"
           }}/>
         <Stack.Screen 
-          name="user"
+          name="profile"
           options={{ 
             title : "Usuário",
             headerStyle: {
