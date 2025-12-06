@@ -15,7 +15,6 @@ function RootLayoutNav() {
 
     const inAuthGroup = segments[0] === 'login' || segments[0] === 'register';
 
-    console.log(isAuthenticated, inAuthGroup);
 
     if (!isAuthenticated && !inAuthGroup) {
       // Redireciona para login se não estiver autenticado
@@ -35,8 +34,8 @@ function RootLayoutNav() {
   }
 
   return (
-    <GestureHandlerRootView>
-      <Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack key={isAuthenticated ? 'authenticated' : 'unauthenticated'}>
         <Stack.Screen 
           name="index" 
           options={{ 
@@ -57,9 +56,9 @@ function RootLayoutNav() {
             headerTitleAlign: "center"
           }}/>
         <Stack.Screen 
-          name="profile"
+          name="user"
           options={{ 
-            title : "Perfil",
+            title : "Usuário",
             headerStyle: {
               backgroundColor: "#0D8694",
             },

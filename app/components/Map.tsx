@@ -203,7 +203,7 @@ export default function Map() {
           }))
         );
   
-        // 4) Atualizar posições dos ônibus a cada 1 segundo
+        // 4) Atualizar posições dos ônibus a cada 5 segundos
         interval = setInterval(async () => {
           try {
             const updated = await getBusPositions(posReq);
@@ -217,13 +217,33 @@ export default function Map() {
                 },
               }))
             );
-          } catch (err) {
-            console.error("Erro ao atualizar posições dos ônibus:", err);
+          } catch (err: any) {
+            // Só loga erros que não sejam de rede ou timeout
+            const isNetworkError = err?.message?.includes('Network Error') || 
+                                  err?.message?.includes('Network request failed') ||
+                                  err?.message?.includes('timeout');
+            
+            if (!isNetworkError) {
+              console.error("Erro ao atualizar posições dos ônibus:", err);
+            }
+            
+            // Se for erro de autenticação (401), limpa o intervalo
+            if (err?.response?.status === 401) {
+              console.log("Token inválido, parando busca de ônibus");
+              if (interval) clearInterval(interval);
+            }
           }
-        }, 1000);
+        }, 5000); // Atualiza a cada 5 segundos
   
-      } catch (err) {
-        console.error("Erro ao buscar rota/posições dos ônibus:", err);
+      } catch (err: any) {
+        // Só loga se não for erro de rede
+        const isNetworkError = err?.message?.includes('Network Error') || 
+                              err?.message?.includes('Network request failed') ||
+                              err?.message?.includes('timeout');
+        
+        if (!isNetworkError) {
+          console.error("Erro ao buscar rota/posições dos ônibus:", err);
+        }
       }
     };
   
