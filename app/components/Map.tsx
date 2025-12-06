@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import 'react-native-gesture-handler';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
@@ -29,6 +29,7 @@ export default function Map() {
   const [isCentered, setIsCentered] = useState(true);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
+  const useGoogleMaps = process.env.EXPO_PUBLIC_PARA_BUILD_APK === 'true';
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [currentDirection, setCurrentDirection] = useState<number>(1);
@@ -367,6 +368,7 @@ export default function Map() {
 
       <MapView
         ref={mapRef}
+        provider={useGoogleMaps ? PROVIDER_GOOGLE : undefined}
         style={styles.map}
         initialRegion={{
           latitude: coords.latitude,
