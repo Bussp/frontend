@@ -1,56 +1,66 @@
+import { addSearch, getRecentSearches } from '@/api/src/utils/searchHistory';
 import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from "@gorhom/bottom-sheet";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Keyboard, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from 'react-native-gesture-handler';
-import { busLine } from '../../models/buses';
 import { buscarLinha } from '../../scripts/apiSPTrans';
 
 interface BottomSheetProps {
     setCurrentLine: (value: string | null) => void;
+    setCurrentDirection: (value: number) => void;
     onSheetChange?: (isExpanded: boolean) => void;
 }
 
-const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, onSheetChange}) => {
+export type LineItem = {
+    line: string;
+    terminal: string;
+    direction: number;
+}
+
+const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrentDirection, onSheetChange}) => {
     const sheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['13%', '80%'], []);
     const [lineSearch, setLineSearch] = useState("");
-    const [lineSuggestions, setSuggestions] = useState<string[]>([]);
-    //const [commonLines, setCommonLines] = useState<string[]>([]);
+    const [lineSuggestions, setSuggestions] = useState<LineItem[]>([]);
+    const [commonLines, setCommonLines] = useState<LineItem[]>([]);
     
-    /*
-    =================== para o histórico ===================
     useEffect(() => {
-        const loadHistory = async () => {
-            const searchHistory: string[] = ["8707-10", "809R-10", "775V-10", ]; // await getHistory();
+    getRecentSearches().then((items: LineItem[]) => {
+        setCommonLines(items);
+    });
+}, []);
 
-            setCommonLines(searchHistory);
-        };
-
-        loadHistory();
-    }, []);
-    */
 
     const handleLineSearchChange = async (text: string) => {
         setLineSearch(text);
         if(text) {
             const res = await buscarLinha(text);
 
-            const uniqueRes = [
-                ...new Set(res.map((item: busLine) => item.lt + ((item.tl !== null) ? "-" + item.tl : "")))
-            ];
+            const items: LineItem[] = res.slice(0, 8).map(v => ({
+                line: v.lt + '-' + v.tl,
+                terminal: (v.sl==2) ? v.tp : v.ts,
+                direction: v.sl,
+            }));
 
-            setSuggestions(uniqueRes.slice(0, 8));
+            setSuggestions(items);
 
         } else {
             setSuggestions([]);
         }
     };
 
-    const handleSuggestionPress = (item: string) => {
-        setCurrentLine(item);
-        setLineSearch(item);
+    async function handleSuggestionPress(item: LineItem) {
+        const itemTrim = item.line.trim();
+        if(!itemTrim) return;
+        
+        const updated = await addSearch(item);
+        setCommonLines(updated);
+
+        setCurrentLine(item.line);
+        setCurrentDirection(item.direction);
+        setLineSearch(item.line + ' ' + item.terminal);
         setSuggestions([]);
         Keyboard.dismiss();
         sheetRef.current?.collapse();
@@ -58,6 +68,7 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, onSheetCha
 
     const removeSelectedLine = () => {
         setCurrentLine(null);
+        setCurrentDirection(1);
         setLineSearch("");
         setSuggestions([]);
         Keyboard.dismiss();
@@ -65,7 +76,7 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, onSheetCha
     }
 
     return (
-        <BottomSheet 
+        <BottomSheet    
             ref={sheetRef} 
             snapPoints={snapPoints}
             keyboardBehavior='extend'
@@ -95,14 +106,14 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, onSheetCha
                         <FlatList
                             data={lineSuggestions}
                             keyboardShouldPersistTaps={'always'}
-                            keyExtractor={(item) => item}
+                            keyExtractor={(item) => item.line + ' ' + item.terminal + ' ' + item.direction}
                             renderItem={({ item }) => (
                                 <View style={styles.itemRow}>
                                     <Text
                                         style={styles.suggestionCell}
                                         onPress={() => handleSuggestionPress(item)}
                                     >
-                                        {item}
+                                        {item.line + ' ' + item.terminal}
                                     </Text>
                                 </View>
                             )}
@@ -110,30 +121,34 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, onSheetCha
                         />
                     }
                 </View>
-                {/*
-                <View style={styles.container}>
-                    <Text style={styles.title}>Suas linhas usuais</Text>
-                </View>
+                
                 {commonLines.length > 0 &&
+                <View style={styles.container}>
+                    <Text style={styles.title}>Suas buscas recentes</Text>
+                </View>
+                }
                 <View>
                     <FlatList
                         data={commonLines}
                         keyboardShouldPersistTaps={'always'}
-                        keyExtractor={(item) => item}
+                        keyExtractor={(item) => item.line + ' ' + item.terminal + ' ' + item.direction}
                         renderItem={({ item }) => (
                             <View style={{alignItems: 'center', justifyContent: 'center'}}>
                                 <TouchableOpacity 
                                     style={styles.commonLine}
                                     onPress={() => handleSuggestionPress(item)}
                                 >
-                                        <Text style={{fontSize: 17.5, fontWeight: 'bold'}}>{item}</Text>
+                                        <Text style={{fontSize: 17.5, fontWeight: 'bold'}}>
+                                            {item.line}
+                                        </Text>
+                                        <Text style={{fontSize: 12.5}}>
+                                            {item.terminal}
+                                        </Text>
                                 </TouchableOpacity>
                             </View>
                         )}
-                    />
+                        />
                 </View>
-                }
-                */}
             </BottomSheetView>
         </BottomSheet>
     );
