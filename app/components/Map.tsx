@@ -29,6 +29,9 @@ export default function Map() {
   const [isCentered, setIsCentered] = useState(true);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
+  // Usa Google Maps apenas quando estiver fazendo build do APK/IPA
+  const useGoogleMaps = process.env.EXPO_PUBLIC_PARA_BUILD_APK === 'true';
+
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [currentDirection, setCurrentDirection] = useState<number>(1);
@@ -367,7 +370,7 @@ export default function Map() {
 
       <MapView
         ref={mapRef}
-        provider={PROVIDER_GOOGLE}
+        provider={useGoogleMaps ? PROVIDER_GOOGLE : undefined}
         style={styles.map}
         initialRegion={{
           latitude: coords.latitude,
