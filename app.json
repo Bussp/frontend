@@ -20,7 +20,12 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.frontend"
+      "package": "com.anonymous.frontend",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyD3aIE4pxuV7cmWFp3YBQVfoq-qUuv_9d4"
+        }
+      }
     },
     "web": {
       "output": "static",
@@ -28,6 +33,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -47,6 +60,12 @@
     },
     "androidNavigationBar": {
       "visible": "sticky-immersive"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "05d8e472-04a5-4e46-a2c0-66b95dca6485"
+      }
     }
   }
 }
