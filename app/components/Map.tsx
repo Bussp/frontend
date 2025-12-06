@@ -53,9 +53,13 @@ export default function Map() {
   });
 
   // Use the hook to fetch route shapes
-  const routeIdentifiers = currentLine 
-    ? [{ bus_line: currentLine, bus_direction: currentDirection }]
-    : [];
+  const routeIdentifiers = currentLine
+  ? [1, 2].map(d => ({
+      bus_line: currentLine,
+      bus_direction: d,
+    }))
+  : [];
+
   const { data: shapesData } = useRouteShapes(routeIdentifiers, {
     enabled: !!currentLine
   });
@@ -398,7 +402,7 @@ export default function Map() {
         }}>
         <View style={styles.userMarker}/>
       </Marker>
-        <PolylineLayer points={route} />
+        <PolylineLayer points={route}/>
         {currentLine!== null && <BusStopsLayer stops={stops} />}
         {currentLine!==null && <BusesLayer line={currentLine} buses={buses} />}
       </MapView>
@@ -427,6 +431,7 @@ export default function Map() {
 
       <BottomSheetMenu 
         setCurrentLine={setCurrentLine}
+        setCurrentDirection={setCurrentDirection}
         onSheetChange={setIsBottomSheetExpanded}
       />
 
