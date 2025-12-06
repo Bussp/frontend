@@ -10,7 +10,7 @@ import { useRouteShapes } from "../../api/src/hooks/useRoutes";
 import { BusPositionsRequest, RouteShapesRequest } from "../../api/src/models/routes.types";
 import { getBusPositions, getRouteShapes, searchRoutes } from "../../api/src/requests/routes";
 import { Bus, BusState, Coord } from "../../models/buses";
-import { computeScore, detectBusState, startScoring, stopScoring } from "../../scripts/busDetection";
+import { computeScore, createInitialBusState, detectBusState, startScoring, stopScoring } from "../../scripts/busDetection";
 import { checkPermission, watchUserLocation } from "../../scripts/getLocation";
 
 import type { CreateTripRequest } from "../../api/src/models/trips.types";
@@ -42,19 +42,7 @@ export default function Map() {
   const [route, setRoute] = useState<Coord[]>([]);
   const [stops, setStops] = useState<Coord[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
-  const [busState, setBusState] = useState<BusState>({
-    currentLine: null,
-    insideBus: false,
-    scoring: false,
-    entryPosition: null,
-    busId: null,
-    lastBusPosition: null,
-    lastUserPosition: null,
-    lastTime: null,
-    distHistory: Array(10).fill(Infinity), // <-- esse "10" é ajustável, tem q arrumar de acordo com a necessidade
-    distIndex: 0,
-    closeCount: 0,
-  });
+  const [busState, setBusState] = useState<BusState>(createInitialBusState());
 
   // Use the hook to fetch route shapes
   const routeIdentifiers = currentLine
@@ -153,7 +141,7 @@ export default function Map() {
       // se vc desmarcou a linha conta o score
       if(busStateRef.current.scoring){
         finishScoring("linha desmarcada", routeRef.current, coords ?? undefined, busStateRef.current.currentLine ?? undefined);
-
+        busStateRef.current = createInitialBusState();
       }
       setBuses([]);
       setRoute([]);
@@ -164,7 +152,7 @@ export default function Map() {
     // basicamente quando vc pega um onibus e esta pontuando, se vc trocar de onibus vai contar o score
     if(busStateRef.current.scoring && busStateRef.current.currentLine && busStateRef.current.currentLine != currentLine){
       finishScoring("mudança de linha", routeRef.current, coords ?? undefined, busStateRef.current.currentLine ?? undefined);
-
+      busStateRef.current = createInitialBusState();
     }
     busStateRef.current.currentLine = currentLine;
   

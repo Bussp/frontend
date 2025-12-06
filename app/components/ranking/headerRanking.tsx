@@ -1,4 +1,3 @@
-import { stylesRanking } from "@/styles/stylesRanking"
 import { DataTable } from "react-native-paper"
 
 interface styleRankingProps {
@@ -15,7 +14,7 @@ export default function HeaderRanking({ styleRanking } : styleRankingProps) {
                 textStyle={styleRanking.rowHeaderText}>Nome</DataTable.Cell>
             <DataTable.Cell 
                 numeric 
-                textStyle={styleRanking.rowHeaderText}>Pontos</DataTable.Cell>
+                textStyle={styleRanking.rowHeaderText}>gCO2</DataTable.Cell>
         </DataTable.Row>
     )
 }
