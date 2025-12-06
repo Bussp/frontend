@@ -2,16 +2,18 @@ import { StyleSheet } from "react-native"
 
 export const styleScroll = StyleSheet.create({
     container : {
-        flex: 1,
-        justifyContent: "center",
+        justifyContent: "flex-start",
+        paddingTop: 0,
         alignItems: "center",
     }
 })
 
 export const stylesRanking = StyleSheet.create({
     container: {
+        flexGrow: 1,
+        paddingTop: 0,
         backgroundColor: "#fff",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
         gap: 15,
         marginTop : 10,
@@ -24,10 +26,12 @@ export const stylesRanking = StyleSheet.create({
         fontWeight: "bold"
     },
     loading: {
+        flex : 1,
         borderRadius: 6,
-        backgroundColor: "#D9D9D9",
+        backgroundColor: "#fff",
         color: "#000",
         justifyContent: "center",
+        alignItems: "center",
         flexDirection: "column",
         width: "95%",
     }

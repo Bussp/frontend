@@ -6,18 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import RankingGlobal from "./components/ranking/globalRanking";
 import RankingLocal from './components/ranking/localRanking';
 
-function LoadingRanking() {
-    return (
-        <DataTable style={stylesRanking.container}>
-            <DataTable.Header>
-                <DataTable.Title>{null}</DataTable.Title>
-                <DataTable.Title>Carregando...</DataTable.Title>
-                <DataTable.Title>{null}</DataTable.Title>
-            </DataTable.Header>
-        </DataTable>
-    );
-}
-
 export default function Ranking() {
 
     const { 
@@ -41,7 +29,10 @@ export default function Ranking() {
 
     if ( rankingIsLoading || userIsLoading || globalIsLoading ) {
         return(
-            <View style={stylesRanking.loading}>
+            <View 
+                style={
+                    stylesRanking.loading
+                }>
                 <ActivityIndicator size='large' color='#0D8694'></ActivityIndicator>
             </View>
         ) 
@@ -51,6 +42,7 @@ export default function Ranking() {
         <SafeAreaView style={{
             flex: 1,
             backgroundColor : "#fff",
+
         }}>
             <ScrollView
                 contentContainerStyle={stylesRanking.container}
