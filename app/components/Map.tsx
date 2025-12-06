@@ -402,8 +402,7 @@ export default function Map() {
 
       {!isCentered && (
         <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
-          <Text 
-            style={styles.recenterText}>Centralizar</Text>
+          <FontAwesome name="crosshairs" size={20} color="black"/>
         </TouchableOpacity>
       )}
 
@@ -475,8 +474,18 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   recenterButton: {
-    top: 40,
+    position: "absolute",
+    top: 95,
     right: 20,
+    backgroundColor: "white",
+    width: 45,
+    height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 25,
+    elevation: 4,
   },
   profileButton: {
     top: 40,
