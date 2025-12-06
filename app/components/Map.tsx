@@ -29,8 +29,11 @@ export default function Map() {
   const [isCentered, setIsCentered] = useState(true);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
-  const useGoogleMaps = process.env.EXPO_PUBLIC_PARA_BUILD_APK === 'true';
-  // rota + estado de o usuário está no onibus ou n
+  // Usa Google Maps (Android) por padrão; permite desativar via variável em tempo de build
+  const useGoogleMapsEnv = globalThis?.process?.env?.EXPO_PUBLIC_PARA_BUILD_APK;
+  const useGoogleMaps = useGoogleMapsEnv === undefined
+    ? true
+    : useGoogleMapsEnv === 'true';
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [currentDirection, setCurrentDirection] = useState<number>(1);
   const [isCurrentLineCircular, setIsCurrentLineCircular] = useState<boolean>(false);
