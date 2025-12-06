@@ -420,18 +420,24 @@ export default function Map() {
 
       <BottomSheetMenu {...{setCurrentLine}}/>
 
-      {!busState.scoring && busState.insideBus && (
-        <TouchableOpacity
-          style={[styles.absoluteButtons, styles.boardButton]}
-          onPress={handleStartScoring}
-        >
-          <Text>Entrei no ônibus</Text>
-        </TouchableOpacity>
-      )}
-
-      {busState.insideBus && (
-        <Text style={styles.busStatus}>Dentro do ônibus {busState.busId}</Text>
-      )}
+      <TouchableOpacity
+        style={[
+          styles.absoluteButtons, 
+          styles.boardButton,
+          !busState.insideBus && styles.boardButtonDisabled,
+          busState.scoring && styles.boardButtonScoring,
+        ]}
+        onPress={handleStartScoring}
+        disabled={!busState.insideBus || busState.scoring}
+      >
+        <Text style={styles.boardButtonText}>
+          {busState.scoring 
+            ? "Pontuando..."
+            : busState.insideBus 
+              ? "Entrei no ônibus" 
+              : "Fora do raio"}
+        </Text>
+      </TouchableOpacity>
 
     </View>
   );
@@ -455,16 +461,6 @@ const styles = StyleSheet.create({
   recenterText: {
     color: "#000",
     fontWeight: "bold",
-  },
-  busStatus: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    backgroundColor: '#38761D',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    elevation: 4,
   },
   absoluteButtons: {
     position: "absolute",
@@ -497,9 +493,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 25,
-    minWidth: 180,       // <-- garante largura sem explodir layout
+    minWidth: 180,
     alignItems: "center",
     zIndex: 999,
+  },
+  boardButtonDisabled: {
+    backgroundColor: "#9E9E9E",
+    opacity: 0.6,
+  },
+  boardButtonScoring: {
+    backgroundColor: "#FF9800",
+  },
+  boardButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 14,
   }
   
   
