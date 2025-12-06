@@ -435,7 +435,7 @@ export default function Map() {
             ? "Pontuando..."
             : busState.insideBus 
               ? "Entrei no ônibus" 
-              : "Fora do ônibus"}
+              : "Fora do raio"}
         </Text>
       </TouchableOpacity>
 
