@@ -4,6 +4,7 @@ import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "../api/src/providers/AuthProvider";
 import { QueryProvider } from "../api/src/providers/QueryProvider";
+import UserScreen from "./user";
 
 function RootLayoutNav() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -56,7 +57,7 @@ function RootLayoutNav() {
             headerTitleAlign: "center"
           }}/>
         <Stack.Screen 
-          name="user"
+          name="profile"
           options={{ 
             title : "Usuário",
             headerStyle: {
