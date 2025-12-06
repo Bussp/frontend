@@ -1,5 +1,5 @@
 import React from "react";
-import { Polyline, Marker } from "react-native-maps";
+import { Polyline } from "react-native-maps";
 
 type Coord = {
   latitude: number;
@@ -14,7 +14,7 @@ type PolylineLayerProps = {
 
 export default function PolylineLayer({
   points,
-  lineColor = "#FFBB11",
+  lineColor = '#FFBB11',
   lineWidth = 3,
 }: PolylineLayerProps) {
   if (!points || points.length < 2) return null; // precisa de pelo menos 2 pontos senao vai pro krl

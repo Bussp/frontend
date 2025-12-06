@@ -51,9 +51,13 @@ export default function Map() {
   });
 
   // Use the hook to fetch route shapes
-  const routeIdentifiers = currentLine 
-    ? [{ bus_line: currentLine, bus_direction: currentDirection }]
-    : [];
+  const routeIdentifiers = currentLine
+  ? [1, 2].map(d => ({
+      bus_line: currentLine,
+      bus_direction: d,
+    }))
+  : [];
+
   const { data: shapesData } = useRouteShapes(routeIdentifiers, {
     enabled: !!currentLine
   });
@@ -203,7 +207,7 @@ export default function Map() {
           }))
         );
   
-        // 4) Atualizar posições dos ônibus a cada 1 segundo
+        // 4) Atualizar posições dos ônibus a cada 5 segundos
         interval = setInterval(async () => {
           try {
             const updated = await getBusPositions(posReq);
@@ -217,13 +221,33 @@ export default function Map() {
                 },
               }))
             );
-          } catch (err) {
-            console.error("Erro ao atualizar posições dos ônibus:", err);
+          } catch (err: any) {
+            // Só loga erros que não sejam de rede ou timeout
+            const isNetworkError = err?.message?.includes('Network Error') || 
+                                  err?.message?.includes('Network request failed') ||
+                                  err?.message?.includes('timeout');
+            
+            if (!isNetworkError) {
+              console.error("Erro ao atualizar posições dos ônibus:", err);
+            }
+            
+            // Se for erro de autenticação (401), limpa o intervalo
+            if (err?.response?.status === 401) {
+              console.log("Token inválido, parando busca de ônibus");
+              if (interval) clearInterval(interval);
+            }
           }
-        }, 1000);
+        }, 5000); // Atualiza a cada 5 segundos
   
-      } catch (err) {
-        console.error("Erro ao buscar rota/posições dos ônibus:", err);
+      } catch (err: any) {
+        // Só loga se não for erro de rede
+        const isNetworkError = err?.message?.includes('Network Error') || 
+                              err?.message?.includes('Network request failed') ||
+                              err?.message?.includes('timeout');
+        
+        if (!isNetworkError) {
+          console.error("Erro ao buscar rota/posições dos ônibus:", err);
+        }
       }
     };
   
@@ -375,7 +399,7 @@ export default function Map() {
         }}>
         <View style={styles.userMarker}/>
       </Marker>
-        <PolylineLayer points={route} />
+        <PolylineLayer points={route}/>
         {currentLine!== null && <BusStopsLayer stops={stops} />}
         {currentLine!==null && <BusesLayer line={currentLine} buses={buses} />}
       </MapView>
@@ -398,7 +422,7 @@ export default function Map() {
           <FontAwesome name="user" size={20} color="black"/>
       </TouchableOpacity>
 
-      <BottomSheetMenu {...{setCurrentLine}}/>
+      <BottomSheetMenu {...{setCurrentLine, setCurrentDirection}}/>
 
       {!busState.scoring && busState.insideBus && (
         <TouchableOpacity
