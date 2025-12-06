@@ -33,6 +33,7 @@ export default function Map() {
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [currentDirection, setCurrentDirection] = useState<number>(1);
+  const [isCurrentLineCircular, setIsCurrentLineCircular] = useState<boolean>(false);
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
 
   const [route, setRoute] = useState<Coord[]>([]);
@@ -170,37 +171,74 @@ export default function Map() {
       try {
         // 1) Buscar detalhes da rota no backend
         const searchResp = await searchRoutes(currentLine);
+
         const routeMatch =
           searchResp.routes.find(
             (r) => r.route.bus_direction === currentDirection
           ) ?? searchResp.routes[0];
-  
-        if (!routeMatch) {
+
+        const routeMatchIfCircular = isCurrentLineCircular
+          ? searchResp.routes.find(
+              (r) => r.route.bus_direction === ((currentDirection === 1) ? 2 : 1)
+            ) ?? searchResp.routes[0]
+          : null;
+
+        if (!routeMatch && !routeMatchIfCircular) {
           console.error("Não foi possível obter detalhes da linha");
           return;
         }
-  
-        // 2) Buscar shape da rota
+
+        // 2) Buscar shape principal
         const shapesReq: RouteShapesRequest = {
           routes: [routeMatch.route],
         };
         const shapesResp = await getRouteShapes(shapesReq);
-  
+
+        let combinedPoints: Coord[] = [];
+
         if (shapesResp.shapes && shapesResp.shapes.length > 0) {
-          setRoute(shapesResp.shapes[0].points as Coord[]);
-        } else {
-          setRoute([]);
+          combinedPoints = [...(shapesResp.shapes[0].points as Coord[])];
         }
+
+        // 3) Se for circular, buscar também o shape da direção oposta
+        if (isCurrentLineCircular && routeMatchIfCircular) {
+          const shapesReqOpposite: RouteShapesRequest = {
+            routes: [routeMatchIfCircular.route],
+          };
+
+          const shapesRespOpposite = await getRouteShapes(shapesReqOpposite);
+
+          console.log(shapesRespOpposite);
+
+          if (
+            shapesRespOpposite.shapes &&
+            shapesRespOpposite.shapes.length > 0
+          ) {
+            const oppositePoints = shapesRespOpposite.shapes[0]
+              .points as Coord[];
+
+            // merge dos pontos
+            combinedPoints = [...combinedPoints, ...oppositePoints];
+          }
+        }
+
+        // 4) Atualizar estado final
+        setRoute(combinedPoints);
+
   
-        // 3) Buscar posições iniciais dos ônibus
-        const posReq: BusPositionsRequest = {
+        // 5) Buscar posições iniciais dos ônibus
+        let allBuses: any[] = [];
+
+        // --- Sentido atual ---
+        const posReqMain: BusPositionsRequest = {
           routes: [{ route_id: routeMatch.route_id }],
         };
-        const initialPositions = await getBusPositions(posReq);
-        setBuses(
-          initialPositions.buses.map((b, index) => ({
-            // id único: linha + sentido + índice + posição
-            id: `${routeMatch.route.bus_line}-${routeMatch.route.bus_direction}-${index}-${b.position.latitude}-${b.position.longitude}`,
+
+        const posMain = await getBusPositions(posReqMain);
+
+        allBuses.push(
+          ...posMain.buses.map((b, index) => ({
+            id: `${routeMatch.route.bus_line}:${routeMatch.route.bus_direction}:${index}:${b.position.latitude}:${b.position.longitude}`,
             type: routeMatch.route.bus_direction,
             position: {
               latitude: b.position.latitude,
@@ -208,38 +246,94 @@ export default function Map() {
             },
           }))
         );
+
+        // --- Sentido oposto se for circular ---
+        if (isCurrentLineCircular && routeMatchIfCircular) {
+          const posReqOpp: BusPositionsRequest = {
+            routes: [{ route_id: routeMatchIfCircular.route_id }],
+          };
+
+          const posOpp = await getBusPositions(posReqOpp);
+
+          allBuses.push(
+            ...posOpp.buses.map((b, index) => ({
+              id: `${routeMatchIfCircular.route.bus_line}:${routeMatchIfCircular.route.bus_direction}:${index}:${b.position.latitude}:${b.position.longitude}`,
+              type: routeMatchIfCircular.route.bus_direction,
+              position: {
+                latitude: b.position.latitude,
+                longitude: b.position.longitude,
+              },
+            }))
+          );
+        }
+
+        // Atualiza estado final
+        setBuses(allBuses);
+
   
-        // 4) Atualizar posições dos ônibus a cada 5 segundos
+        // 6) Atualizar posições dos ônibus a cada 5 segundos
         interval = setInterval(async () => {
-          try {
-            const updated = await getBusPositions(posReq);
-            setBuses(
-              updated.buses.map((b, index) => ({
-                id: `${routeMatch.route.bus_line}-${routeMatch.route.bus_direction}-${index}-${b.position.latitude}-${b.position.longitude}`,
-                type: routeMatch.route.bus_direction,
+        try {
+          let allBuses: any[] = [];
+
+          // --- 1) Buscar ônibus do sentido atual ---
+          const posReqMain: BusPositionsRequest = {
+            routes: [{ route_id: routeMatch.route_id }],
+          };
+
+          const updatedMain = await getBusPositions(posReqMain);
+
+          allBuses.push(
+            ...updatedMain.buses.map((b, index) => ({
+              id: `${routeMatch.route.bus_line}:${routeMatch.route.bus_direction}:${index}:${b.position.latitude}:${b.position.longitude}`,
+              type: routeMatch.route.bus_direction,
+              position: {
+                latitude: b.position.latitude,
+                longitude: b.position.longitude,
+              },
+            }))
+          );
+
+          // --- 2) Se for circular, buscar ônibus do sentido oposto também ---
+          if (isCurrentLineCircular && routeMatchIfCircular) {
+            const posReqOpp: BusPositionsRequest = {
+              routes: [{ route_id: routeMatchIfCircular.route_id }],
+            };
+
+            const updatedOpposite = await getBusPositions(posReqOpp);
+
+            allBuses.push(
+              ...updatedOpposite.buses.map((b, index) => ({
+                id: `${routeMatch.route.bus_line}:${routeMatchIfCircular.route.bus_direction}:${index}:${b.position.latitude}:${b.position.longitude}`,
+                type: routeMatchIfCircular.route.bus_direction,
                 position: {
                   latitude: b.position.latitude,
                   longitude: b.position.longitude,
                 },
               }))
             );
-          } catch (err: any) {
-            // Só loga erros que não sejam de rede ou timeout
-            const isNetworkError = err?.message?.includes('Network Error') || 
-                                  err?.message?.includes('Network request failed') ||
-                                  err?.message?.includes('timeout');
-            
-            if (!isNetworkError) {
-              console.error("Erro ao atualizar posições dos ônibus:", err);
-            }
-            
-            // Se for erro de autenticação (401), limpa o intervalo
-            if (err?.response?.status === 401) {
-              console.log("Token inválido, parando busca de ônibus");
-              if (interval) clearInterval(interval);
-            }
           }
-        }, 5000); // Atualiza a cada 5 segundos
+
+          // --- 3) Atualizar estado com TODOS os ônibus ---
+          setBuses(allBuses);
+
+        } catch (err: any) {
+          const isNetworkError =
+            err?.message?.includes("Network Error") ||
+            err?.message?.includes("Network request failed") ||
+            err?.message?.includes("timeout");
+
+          if (!isNetworkError) {
+            console.error("Erro ao atualizar posições dos ônibus:", err);
+          }
+
+          if (err?.response?.status === 401) {
+            console.log("Token inválido, parando busca de ônibus");
+            if (interval) clearInterval(interval);
+          }
+        }
+      }, 5000);
+
   
       } catch (err: any) {
         // Só loga se não for erro de rede
@@ -432,6 +526,7 @@ export default function Map() {
       <BottomSheetMenu 
         setCurrentLine={setCurrentLine}
         setCurrentDirection={setCurrentDirection}
+        setIsCurrentLineCircular={setIsCurrentLineCircular}
         onSheetChange={setIsBottomSheetExpanded}
       />
 

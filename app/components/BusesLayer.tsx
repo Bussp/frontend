@@ -21,7 +21,7 @@ export default function BusesLayer({ line, buses }: Props) {
           <FontAwesome5
             name="bus-alt"
             size={16}
-            color={"#11BBFF"}
+            color={(bus.type === 1) ? "#11BBFF" : "#11DD33"}
           />
         </Marker>
       )}

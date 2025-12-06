@@ -11,7 +11,14 @@ export async function getRecentSearches(): Promise<LineItem[]> {
 export async function addSearch(query: LineItem) {
   let searches = await getRecentSearches();
 
-  searches = searches.filter(item => item !== query);
+  searches = searches.filter(
+    item =>
+      !(
+        item.line === query.line &&
+        item.terminal === query.terminal &&
+        item.direction === query.direction
+      )
+  );
 
   searches.unshift(query);
 

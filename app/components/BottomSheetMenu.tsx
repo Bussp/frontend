@@ -10,16 +10,18 @@ import { buscarLinha } from '../../scripts/apiSPTrans';
 interface BottomSheetProps {
     setCurrentLine: (value: string | null) => void;
     setCurrentDirection: (value: number) => void;
+    setIsCurrentLineCircular: (value: boolean) => void;
     onSheetChange?: (isExpanded: boolean) => void;
 }
 
 export type LineItem = {
     line: string;
     terminal: string;
+    isCircular: boolean;
     direction: number;
 }
 
-const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrentDirection, onSheetChange}) => {
+const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrentDirection, setIsCurrentLineCircular, onSheetChange}) => {
     const sheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['13%', '80%'], []);
     const [lineSearch, setLineSearch] = useState("");
@@ -40,7 +42,8 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrent
 
             const items: LineItem[] = res.slice(0, 8).map(v => ({
                 line: v.lt + '-' + v.tl,
-                terminal: (v.sl==2) ? v.tp : v.ts,
+                terminal: ((v.sl==2) ? v.tp : v.ts),
+                isCircular: v.lc,
                 direction: v.sl,
             }));
 
@@ -60,6 +63,7 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrent
 
         setCurrentLine(item.line);
         setCurrentDirection(item.direction);
+        setIsCurrentLineCircular(item.isCircular);
         setLineSearch(item.line + ' ' + item.terminal);
         setSuggestions([]);
         Keyboard.dismiss();
@@ -69,6 +73,7 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrent
     const removeSelectedLine = () => {
         setCurrentLine(null);
         setCurrentDirection(1);
+        setIsCurrentLineCircular(false);
         setLineSearch("");
         setSuggestions([]);
         Keyboard.dismiss();
