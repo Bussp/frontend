@@ -27,6 +27,7 @@ export default function Map() {
   
   const [coords, setCoords] = useState<Coord | null>(null);
   const [isCentered, setIsCentered] = useState(true);
+  const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
   // rota + estado de o usuário está no onibus ou n
   const [currentLine, setCurrentLine] = useState<string | null>(null);
@@ -400,11 +401,16 @@ export default function Map() {
         {currentLine!==null && <BusesLayer line={currentLine} buses={buses} />}
       </MapView>
 
-      {!isCentered && (
-        <TouchableOpacity style={styles.recenterButton} onPress={recenter}>
-          <FontAwesome name="crosshairs" size={20} color="black"/>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity 
+        style={[
+          styles.recenterButton,
+          isCentered && styles.hidden
+        ]} 
+        onPress={recenter}
+        disabled={isCentered}
+      >
+        <FontAwesome name="crosshairs" size={20} color="black"/>
+      </TouchableOpacity>
 
       <TouchableOpacity 
         style={[styles.absoluteButtons, styles.communityButton]}
@@ -417,7 +423,10 @@ export default function Map() {
           <FontAwesome name="user" size={20} color="black"/>
       </TouchableOpacity>
 
-      <BottomSheetMenu {...{setCurrentLine}}/>
+      <BottomSheetMenu 
+        setCurrentLine={setCurrentLine}
+        onSheetChange={setIsBottomSheetExpanded}
+      />
 
       <TouchableOpacity
         style={[
@@ -475,7 +484,7 @@ const styles = StyleSheet.create({
   },
   recenterButton: {
     position: "absolute",
-    bottom: '15%',
+    top: 95,
     right: 20,
     backgroundColor: "white",
     width: 45,
@@ -486,7 +495,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 25,
     elevation: 4,
-    zIndex: 1,
+  },
+  hidden: {
+    opacity: 0,
   },
   profileButton: {
     top: 40,

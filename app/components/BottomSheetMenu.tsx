@@ -9,9 +9,10 @@ import { buscarLinha } from '../../scripts/apiSPTrans';
 
 interface BottomSheetProps {
     setCurrentLine: (value: string | null) => void;
+    onSheetChange?: (isExpanded: boolean) => void;
 }
 
-const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine}) => {
+const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, onSheetChange}) => {
     const sheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['13%', '80%'], []);
     const [lineSearch, setLineSearch] = useState("");
@@ -71,6 +72,9 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine}) => {
             keyboardBlurBehavior='restore'
             enableDynamicSizing={false}
             android_keyboardInputMode='adjustPan'
+            onChange={(index) => {
+                onSheetChange?.(index === 1);
+            }}
         >
             <BottomSheetView>
                 <View style={styles.containerSearch}>
