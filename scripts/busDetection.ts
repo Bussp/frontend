@@ -72,7 +72,7 @@ export function detectBusState(state: BusState, user: Coord, buses: Bus[], route
 
   const nextIndex = (idx+1)%N;
 
-  const inside = (newCloseCount >= 0.4*N);
+  const inside = (newCloseCount >= 0.1*N);
   return {
     currentLine: state.currentLine,
     insideBus: inside,
@@ -164,7 +164,7 @@ export function computeScore(
   }
 
   // totalDistance está em metros (porque dist usa meterPerDeg)
-  return totalDistance;
+  return Math.round(totalDistance);
 }
 
 export function stopScoring(state: BusState): BusState {
