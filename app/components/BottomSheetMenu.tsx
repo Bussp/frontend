@@ -42,7 +42,7 @@ const BottomSheetMenu: React.FC<BottomSheetProps> = ({setCurrentLine, setCurrent
 
             const items: LineItem[] = res.slice(0, 8).map(v => ({
                 line: v.lt + '-' + v.tl,
-                terminal: ((v.sl==2) ? v.tp : v.ts),
+                terminal: ((v.sl==1) ? v.tp : v.ts),
                 isCircular: v.lc,
                 direction: v.sl,
             }));
