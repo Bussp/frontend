@@ -22,6 +22,7 @@ export interface BusState {
 export interface Bus { id: string; position: Coord; }
 
 const DIST_USER_TO_BUS = 250; // é q se o gps for mto ruidoso, pode ser q o user esteja marcado mto longe do ponto de onibus apesar de nao estar
+const HISTORY_SIZE = 30; // quantas amostras de distancia guardar
 
 function dist(a: Coord, b: Coord) {
   //return haversine(a, b);
@@ -172,5 +173,22 @@ export function stopScoring(state: BusState): BusState {
     ...state,
     scoring: false,
     entryPosition: null,
+  };
+}
+
+export function createInitialBusState(): BusState {
+
+  return {
+    currentLine: null,
+    insideBus: false,
+    scoring: false,
+    entryPosition: null,
+    busId: null,
+    lastBusPosition: null,
+    lastUserPosition: null,
+    lastTime: null,
+    distHistory: Array(HISTORY_SIZE).fill(Infinity),
+    distIndex: 0,
+    closeCount: 0,
   };
 }

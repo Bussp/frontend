@@ -25,7 +25,7 @@ const UserScore = ({ data }: { data: User | undefined }) => <>
     <Surface style={stylesUser.scoreContainer}>
         <Text style={{ fontSize: 56, marginRight: 24 }}>🚍</Text>
         <View style={{ display: "flex", flexDirection: "column", paddingTop: 10 }}>
-            <Text style={{ fontSize: 26, fontWeight: "bold" }}>{data?.score} pontos</Text>
+            <Text style={{ fontSize: 26, fontWeight: "bold" }}>{data?.score} gCO2</Text>
             <Text>totais</Text>
         </View>
     </Surface>
@@ -37,7 +37,7 @@ const UserHistory = ({ histData }: { histData: HistoryResponse | undefined }) =>
             <DataTable.Row>
                 <DataTable.Cell style={{ flex: 1.8 }}>Data</DataTable.Cell>
                 <DataTable.Cell style={{ flex: 1.8 }}>Linha</DataTable.Cell>
-                <DataTable.Cell numeric>Pontos</DataTable.Cell>
+                <DataTable.Cell numeric>gCO2</DataTable.Cell>
             </DataTable.Row>
 
             {histData?.trips
@@ -108,7 +108,7 @@ export default function Profile() {
                 <Image style={stylesUser.icon} source={icons[iconId]}></Image>
                 <Text style={stylesUser.username}>{data?.name}</Text>
                 
-                <UserFieldTitle title='Score' />
+                <UserFieldTitle title='Economia' />
                 <UserScore data={data} />
 
                 <UserFieldTitle title='Viagens passadas' />
