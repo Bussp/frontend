@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
   },
   recenterButton: {
     position: "absolute",
-    top: 95,
+    bottom: '15%',
     right: 20,
     backgroundColor: "white",
     width: 45,
@@ -486,6 +486,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 25,
     elevation: 4,
+    zIndex: 1,
   },
   profileButton: {
     top: 40,
