@@ -10,13 +10,13 @@ export const styleScroll = StyleSheet.create({
 
 export const stylesRanking = StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: "#fff",
         justifyContent: "center",
         alignItems: "center",
         gap: 15,
         marginTop : 10,
         marginBottom : 10,
+        paddingBottom: 20,
     },
     title: {
         color: "#fff",

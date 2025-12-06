@@ -1,10 +1,10 @@
+import { useCurrentUser, useGlobalRanking, useUserRanking } from '@/api/src';
+import { stylesRanking } from '@/styles/stylesRanking';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { styleGlobalRanking, styleScroll, stylesRanking } from '@/styles/stylesRanking';
+import { ActivityIndicator, DataTable } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import RankingGlobal from "./components/ranking/globalRanking";
 import RankingLocal from './components/ranking/localRanking';
-import { ActivityIndicator, DataTable } from 'react-native-paper';
-import { useUserRanking , User, useCurrentUser, useGlobalRanking } from '@/api/src';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 function LoadingRanking() {
     return (
@@ -49,6 +49,7 @@ export default function Ranking() {
 
     return (
         <SafeAreaView style={{
+            flex: 1,
             backgroundColor : "#fff",
         }}>
             <ScrollView
