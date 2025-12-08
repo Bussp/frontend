@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, AppState, AppStateStatus, AppStateEvent } from 'react-native';
 import 'react-native-gesture-handler';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -43,6 +43,10 @@ export default function Map() {
   const [stops, setStops] = useState<Coord[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [busState, setBusState] = useState<BusState>(createInitialBusState());
+
+  // Estados para verificar se está em plano de fundo
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
   // Use the hook to fetch route shapes
   const routeIdentifiers = currentLine
@@ -354,6 +358,11 @@ export default function Map() {
 
   useEffect(() => {
     let subscription: any;
+    // Verifica se o aplicativo está em background
+    const isBackground = AppState.addEventListener('change', nextAppState => {
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    });
   
     (async () => {
       const ok = await checkPermission();
@@ -384,9 +393,9 @@ export default function Map() {
   
         // 2) Transição: estava DENTRO e agora está FORA -> saiu do ônibus
         if (
-          prevBusState.insideBus &&
+          (prevBusState.insideBus &&
           !detectedState.insideBus &&
-          prevBusState.scoring
+          prevBusState.scoring) || appStateVisible != 'active'
         ) {
           // aqui você delega TUDO pra finishScoring:
           // - computar score
@@ -405,6 +414,7 @@ export default function Map() {
   
     return () => {
       if (subscription) subscription.remove();
+      isBackground.remove();
     };
   }, []);
   
