@@ -484,7 +484,9 @@ export default function Map() {
         coordinate={{
           latitude: coords.latitude,
           longitude: coords.longitude,
-        }}>
+        }}
+        anchor={{ x: -0.5, y: 0}}
+        >
         <View style={styles.userMarker}/>
       </Marker>
         <PolylineLayer points={route}/>
