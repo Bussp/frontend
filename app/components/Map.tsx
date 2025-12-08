@@ -481,6 +481,7 @@ export default function Map() {
       >
 
       <Marker
+        anchor={{ x: .5, y: .5 }}
         coordinate={{
           latitude: coords.latitude,
           longitude: coords.longitude,
