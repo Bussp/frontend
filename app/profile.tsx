@@ -6,7 +6,6 @@ import { useAuth } from '@/api/src/providers/AuthProvider';
 import { useRouter } from 'expo-router';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ActivityIndicator, Button, DataTable, Divider, Surface } from 'react-native-paper';
-import { removeSearch } from '@/api/src/utils/removeSearchHistory';
 
 const icons: ImageSourcePropType[] = [
     require("@/assets/images/user_icons/1.png"),
@@ -82,8 +81,6 @@ export default function Profile() {
                 // Clear React Query cache
                 logoutMutation();
                 // Navigation will be handled by _layout.tsx auth guard
-                // Remove history cache
-                await removeSearch();
               },
             },
           ]
