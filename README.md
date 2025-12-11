@@ -2,6 +2,25 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Environment Dependencies
+
+This project requires:
+
+```
+node.js v24.8.0
+pnpm v10.17.0
+npm expo v11.6.0
+```
+
+The development was based on
+
+```
+TypeScript (tsconfig.json, expo-env.d.ts)
+Babel (babel.config.js - transpilater)
+ESLint (eslint.config.js - linting)
+EAS (Expo Application Services - eas.json)
+```
+
 ## Get started
 
 1. Install dependencies
