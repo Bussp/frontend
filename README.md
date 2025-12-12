@@ -2,7 +2,7 @@
 
 Aplicativo mobile para rastreamento e gamificação de viagens de ônibus em São Paulo.
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 - **Node.js**: v24.8.0 ou superior
 - **npm**: v10.0.0 ou superior (vem com Node.js)
@@ -17,7 +17,7 @@ npm install -g expo-cli
 npm install -g eas-cli
 ```
 
-## 🚀 Configuração Inicial
+## Configuração Inicial
 
 ### 1. Clonar o repositório
 
@@ -55,7 +55,7 @@ EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=sua_chave_aqui
 EXPO_PUBLIC_PARA_BUILD_APK=false
 ```
 
-#### 📝 Configurando `EXPO_PUBLIC_API_URL`
+#### Configurando `EXPO_PUBLIC_API_URL`
 
 Escolha a URL correta dependendo do seu ambiente:
 
@@ -66,7 +66,7 @@ Escolha a URL correta dependendo do seu ambiente:
     - Windows: `ipconfig`
 - **Servidor de produção**: `https://api.seudominio.com`
 
-#### 🗺️ Configurando Google Maps API Key
+#### Configurando Google Maps API Key
 
 1. Acesse [Google Cloud Console](https://console.cloud.google.com/google/maps-apis)
 2. Crie um novo projeto ou selecione um existente
@@ -74,7 +74,7 @@ Escolha a URL correta dependendo do seu ambiente:
 4. Crie credenciais (API Key)
 5. Copie a chave e cole em `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`
 
-#### ⚙️ Configurando `EXPO_PUBLIC_PARA_BUILD_APK`
+#### Configurando `EXPO_PUBLIC_PARA_BUILD_APK`
 
 - **`false`**: Use durante desenvolvimento com Expo Go
   - Android usa mapas nativos
@@ -85,7 +85,7 @@ Escolha a URL correta dependendo do seu ambiente:
   - Android usa Google Maps (requer API Key)
   - iOS usa Apple Maps (não afetado)
 
-## 🏃 Executando o Projeto
+## Executando o Projeto
 
 ### Desenvolvimento com Expo Go
 
@@ -109,7 +109,7 @@ npm run web        # Abre no navegador
    - **Android**: App Expo Go
    - **iOS**: Câmera nativa do iPhone
 
-## 📦 Build para Produção
+## Build para Produção
 
 ### Configuração EAS (primeira vez)
 
@@ -158,7 +158,7 @@ Configurados em `eas.json`:
 - **`preview`**: Build de teste (usado para APK/IPA de teste)
 - **`production`**: Build de produção para publicação nas lojas
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 - **TypeScript**: Tipagem estática
 - **Expo**: Framework React Native
@@ -170,7 +170,7 @@ Configurados em `eas.json`:
 - **Bottom Sheet**: Interface de menu deslizante
 - **EAS Build**: Sistema de build da Expo
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 frontend/
